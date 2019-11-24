@@ -4,11 +4,20 @@ import { AppService } from './app.service'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from './auth/auth.module'
 import { AccountModule } from './account/account.module'
-
-const mongoConnection = 'mongodb://localhost:27017/stew'
+import { ConfigModule } from './config/config.module'
+import { ConfigService } from './config/config.service'
 
 @Module({
-  imports: [MongooseModule.forRoot(mongoConnection, {useNewUrlParser: true}), AuthModule, AccountModule],
+  imports: [
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get('MONGODB_URI'),
+        useNewUrlParser: true,
+      }),
+      inject: [ConfigService],
+  }),
+  AuthModule, AccountModule],
   controllers: [AppController],
   providers: [AppService],
 })

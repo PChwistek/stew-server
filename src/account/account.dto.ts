@@ -3,7 +3,7 @@ import { CreateAccountDto } from './create-account.dto'
 export class AccountDto {
   readonly username: string
   readonly email: string
-  readonly password: string
+  readonly passwordHash: string
   karma: number
   dateCreated: Date
   favoriteRecipes: Array<string>
@@ -11,7 +11,7 @@ export class AccountDto {
   constructor(createAccountDto: CreateAccountDto) {
     this.username = createAccountDto.username
     this.email = createAccountDto.email
-    this.password = createAccountDto.password
+    this.passwordHash = createAccountDto.passwordHash
     this.karma = 0
     this.dateCreated = new Date()
     this.favoriteRecipes = []
