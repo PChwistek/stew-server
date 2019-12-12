@@ -13,30 +13,32 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.accountService.findOne(username)
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.accountService.findOne(email)
     if (user) {
-      const match = await bcrypt.compare(pass, user.passwordHash)
-      return match
+      const match = await bcrypt.compare(password, user.passwordHash)
+      if (match) {
+        return user
+      }
     }
     return null
   }
 
+  async userExists(email: string): Promise<boolean> {
+    const user = await this.accountService.findOne(email)
+    return user !== null
+  }
+
   async createUser(createAccountDto: CreateAccountDto): Promise<any> {
-    const user = await this.accountService.findOne(createAccountDto.username)
-    if (!user) {
-      const saltRounds = 10
-      bcrypt.hash(createAccountDto.password, saltRounds).then(hash => {
-        createAccountDto.passwordHash = hash
-        this.accountService.create(createAccountDto)
-      })
-      return 'success'
-    }
-    return 'user already exists'
+    const saltRounds = 10
+    const hash = await bcrypt.hash(createAccountDto.password, saltRounds)
+    createAccountDto.passwordHash = hash
+    await this.accountService.create(createAccountDto)
+    return this.login(new LoginAccountDto())
   }
 
   async login(account: LoginAccountDto) {
-    const payload = { username: account.username, sub: 'the_secret_sauce_09013?//1' }
+    const payload = { email: account.username, sub: 'the_secret_sauce_09013?//1' }
     return {
       access_token: this.jwtService.sign(payload),
     }

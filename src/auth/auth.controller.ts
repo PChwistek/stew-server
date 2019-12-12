@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { AuthService } from './auth.service'
 import { CreateAccountDto } from '../account/create-account.dto'
@@ -17,7 +17,18 @@ export class AuthController {
 
   @Post('/register')
   async createAccount(@Body() createAccountDto: CreateAccountDto) {
-    return this.authService.createUser(createAccountDto)
+    const exists = await this.authService.userExists(createAccountDto.email)
+    if (!exists) {
+      return this.authService.createUser(createAccountDto)
+    }
+
+    throw new BadRequestException('Account with this email already exists')
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/validate')
+  async checkToken() {
+    return true
   }
 
   @UseGuards(AuthGuard('jwt'))

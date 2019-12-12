@@ -3,9 +3,6 @@ import { IsEmail, IsNotEmpty } from 'class-validator'
 export class CreateAccountDto {
 
   @IsNotEmpty()
-  readonly username: string
-
-  @IsNotEmpty()
   @IsEmail()
   readonly email: string
 
@@ -14,8 +11,7 @@ export class CreateAccountDto {
 
   passwordHash: string
 
-  constructor(username, email, password) {
-    this.username = username
+  constructor(email, password) {
     this.email = email
     this.password = password
   }

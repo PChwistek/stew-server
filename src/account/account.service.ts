@@ -19,8 +19,8 @@ export class AccountService {
     return await this.accountModel.find().exec()
   }
 
-  async findOne(username: string): Promise<Account> {
-    return await this.accountModel.findOne({ username }).exec()
+  async findOne(email: string): Promise<Account> {
+    return await this.accountModel.findOne({ email }).exec()
   }
 
 }
