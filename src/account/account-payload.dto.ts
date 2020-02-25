@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator'
 
-export class CreateAccountDto {
+export class AccountPayloadDto {
 
   @IsNotEmpty()
   @IsEmail()
@@ -8,8 +8,6 @@ export class CreateAccountDto {
 
   @IsNotEmpty()
   readonly password: string
-
-  passwordHash: string
 
   constructor(email, password) {
     this.email = email

@@ -1,19 +1,18 @@
 import { IsNotEmpty, IsEmail } from 'class-validator'
-import { CreateAccountDto } from './create-account.dto'
+import { AccountPayloadDto } from './account-payload.dto'
 
 export class LoginAccountDto {
 
-  // THIS HAS TO BE USERNAME B/C passport will flip!!!
   @IsEmail()
   @IsNotEmpty()
-  username: string
+  email: string
 
   @IsNotEmpty()
   password: string
 
-  LoginAccountDto(createAccountDto: CreateAccountDto) {
-    this.username = createAccountDto.email
-    this.password = createAccountDto.password
+  LoginAccountDto(accountPayloadDto: AccountPayloadDto) {
+    this.email = accountPayloadDto.email
+    this.password = accountPayloadDto.password
   }
 
 }

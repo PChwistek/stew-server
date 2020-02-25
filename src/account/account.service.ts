@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from './account.interface'
 import { AccountDto } from './account.dto'
-import { CreateAccountDto } from './create-account.dto'
+import { AccountPayloadDto } from './account-payload.dto'
 
 @Injectable()
 export class AccountService {
   constructor(@InjectModel('Account') private readonly accountModel: Model<Account>) {}
 
-  async create(createAccountDto: CreateAccountDto): Promise<Account> {
-    const fullAccount = new AccountDto(createAccountDto)
+  async create(accountPayloadDto: AccountPayloadDto, passwordHash: string): Promise<Account> {
+    const fullAccount = new AccountDto(accountPayloadDto, passwordHash)
     const createdAccount = new this.accountModel(fullAccount)
     return await createdAccount.save()
   }
