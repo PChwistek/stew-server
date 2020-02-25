@@ -21,8 +21,8 @@ export class RecipeService {
     return await createdRecipe.save()
   }
 
-  async getUserRecipes(  ) {
-    return {}
+  async getRecipesByAuthorId(_id: string) {
+    return await this.recipeModel.find({ authorId: _id }).exec()
   }
 
 }

@@ -43,6 +43,7 @@ export class AuthService {
     console.log('user', user)
     return {
       username: user.username,
+      lastUpdated: user.lastUpdated,
       access_token: this.jwtService.sign(payload),
     }
   }

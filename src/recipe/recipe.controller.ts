@@ -18,4 +18,12 @@ export class RecipeController {
     return theRecipe
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/byAuthor')
+  async getRecipesByAuthor(@Request() req): Promise<Array<Recipe>> {
+    const { user } = req
+    const recipes = await this.recipeService.getRecipesByAuthorId(user._id)
+    return recipes
+  }
+
 }
