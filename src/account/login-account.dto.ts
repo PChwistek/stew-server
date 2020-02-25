@@ -1,5 +1,4 @@
 import { IsNotEmpty, IsEmail } from 'class-validator'
-import { AccountPayloadDto } from './account-payload.dto'
 
 export class LoginAccountDto {
 
@@ -10,9 +9,9 @@ export class LoginAccountDto {
   @IsNotEmpty()
   password: string
 
-  LoginAccountDto(accountPayloadDto: AccountPayloadDto) {
-    this.email = accountPayloadDto.email
-    this.password = accountPayloadDto.password
+  constructor(email: string, password: string ) {
+    this.email = email
+    this.password = password
   }
 
 }

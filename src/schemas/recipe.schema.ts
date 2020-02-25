@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import { WindowConfig } from '../recipe/windowConfig.interface'
+// import { WindowConfig } from '../recipe/windowConfig.interface'
 
 export const RecipeSchema = new mongoose.Schema({
   name: String,

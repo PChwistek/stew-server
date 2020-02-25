@@ -6,13 +6,19 @@ export class AccountDto {
   username: string
   dateCreated: Date
   favoriteRecipes: Array<string>
+  lastUpdated: Date
 
-  constructor(payloadDto: AccountPayloadDto, passwordHash) {
-    this.email = payloadDto.email
+  constructor(email, passwordHash, username) {
+    this.email = email
     this.passwordHash = passwordHash
-    this.username = ''
+    this.username = username
     this.dateCreated = new Date()
     this.favoriteRecipes = []
+    this.lastUpdated = new Date()
+  }
+
+  updateLastUpdated() {
+    this.lastUpdated = new Date()
   }
 
 }

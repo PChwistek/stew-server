@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.accountService.findOne(email)
+    const user = await this.accountService.findOneByEmail(email)
     if (user) {
       const match = await bcrypt.compare(password, user.passwordHash)
       if (match) {
@@ -25,7 +25,7 @@ export class AuthService {
   }
 
   async userExists(email: string): Promise<boolean> {
-    const user = await this.accountService.findOne(email)
+    const user = await this.accountService.findOneByEmail(email)
     return user !== null
   }
 
@@ -34,12 +34,13 @@ export class AuthService {
     const hash = await bcrypt.hash(payloadAccountDto.password, saltRounds)
     const passwordHash = hash
     await this.accountService.create(payloadAccountDto, passwordHash)
-    return this.login(new LoginAccountDto())
+    return this.login(new LoginAccountDto(payloadAccountDto.email, payloadAccountDto.password))
   }
 
   async login(account: LoginAccountDto) {
     const payload = { email: account.email, sub: 'the_secret_sauce_09013?//1' }
-    const user = await this.accountService.findOne(account.email)
+    const user = await this.accountService.findOneByEmail(account.email)
+    console.log('user', user)
     return {
       username: user.username,
       access_token: this.jwtService.sign(payload),
