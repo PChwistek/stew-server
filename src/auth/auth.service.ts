@@ -39,7 +39,9 @@ export class AuthService {
 
   async login(account: LoginAccountDto) {
     const payload = { email: account.email, sub: 'the_secret_sauce_09013?//1' }
+    const user = await this.accountService.findOne(account.email)
     return {
+      username: user.username,
       access_token: this.jwtService.sign(payload),
     }
   }

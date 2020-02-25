@@ -18,7 +18,7 @@ export class RecipeService {
     return await createdRecipe.save()
   }
 
-  async fetchRecipes() {
+  async getUserRecipes(  ) {
     return {}
   }
 
