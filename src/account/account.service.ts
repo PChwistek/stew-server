@@ -21,10 +21,7 @@ export class AccountService {
   }
 
   async setUpdatedTime(_id: string): Promise<Account> {
-    const theAccount = await this.findOneById(_id)
-    theAccount.lastUpdated = new Date()
-    const accountModel = new this.accountModel(theAccount)
-    return await accountModel.save()
+    return await this.accountModel.findOneAndUpdate({ _id }, { lastUpdated: new Date() }, { returnOriginal: false })
   }
 
   async findOneById(_id: string): Promise<Account> {

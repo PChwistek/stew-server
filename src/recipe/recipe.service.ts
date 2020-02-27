@@ -22,7 +22,8 @@ export class RecipeService {
     return await createdRecipe.save()
   }
 
-  async editRecipe(editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
+  async editRecipe(user: Account, editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
+    await this.accountService.setUpdatedTime(user._id)
     const _id = editRecipePayloadDto._id
     return await this.recipeModel.findOneAndUpdate({ _id }, { ...editRecipePayloadDto, $inc: {__v: 1}}, {
       returnOriginal: false,

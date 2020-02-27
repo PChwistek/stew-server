@@ -21,8 +21,9 @@ export class RecipeController {
 
   @UseGuards(AuthGuard('jwt'))
   @Patch('/edit')
-  async editRecipe(@Body() editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
-    return await this.recipeService.editRecipe(editRecipePayloadDto)
+  async editRecipe(@Request() req, @Body() editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
+    const { user } = req
+    return await this.recipeService.editRecipe(user, editRecipePayloadDto)
   }
 
   @UseGuards(AuthGuard('jwt'))
