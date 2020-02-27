@@ -1,8 +1,9 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Req } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Req, Patch } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './recipe-payload.dto'
+import { EditRecipePayloadDto } from './edit-recipe-payload.dto'
 import { Recipe } from './recipe.interface'
 import { request } from 'http'
 
@@ -16,6 +17,12 @@ export class RecipeController {
     const { user } = req
     const theRecipe = await this.recipeService.createRecipe(user, recipePayloadDto)
     return theRecipe
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('/edit')
+  async editRecipe(@Body() editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
+    return await this.recipeService.editRecipe(editRecipePayloadDto)
   }
 
   @UseGuards(AuthGuard('jwt'))

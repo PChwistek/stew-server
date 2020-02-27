@@ -6,6 +6,7 @@ import { RecipePayloadDto } from './recipe-payload.dto'
 import { Account } from '../account/account.interface'
 import { RecipeDto } from './recipe.dto'
 import { AccountService } from '../account/account.service'
+import { EditRecipePayloadDto } from './edit-recipe-payload.dto'
 
 @Injectable()
 export class RecipeService {
@@ -19,6 +20,13 @@ export class RecipeService {
     const createdRecipe = new this.recipeModel(recipeDto)
     await this.accountService.setUpdatedTime(user._id)
     return await createdRecipe.save()
+  }
+
+  async editRecipe(editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
+    const _id = editRecipePayloadDto._id
+    return await this.recipeModel.findOneAndUpdate({ _id }, { ...editRecipePayloadDto, $inc: {__v: 1}}, {
+      returnOriginal: false,
+    })
   }
 
   async getRecipesByAuthorId(_id: string) {

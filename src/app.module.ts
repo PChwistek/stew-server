@@ -14,6 +14,7 @@ import { ConfigService } from './config/config.service'
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get('MONGODB_URI'),
+        useFindAndModify: false,
         useNewUrlParser: true,
       }),
       inject: [ConfigService],
