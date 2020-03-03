@@ -6,7 +6,7 @@ import { AccountSchema } from '../schemas/account.schema'
 // const accountModel = new AccountDto(new CreateAccountDto('test', 'test@gmail.com', 'test'))
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Account', schema: AccountSchema }])],
+  imports: [MongooseModule.forFeature([{ name: 'Account', schema: AccountSchema }], 'stew')],
   providers: [AccountService],
   exports: [AccountService],
 })

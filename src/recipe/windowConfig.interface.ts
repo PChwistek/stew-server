@@ -4,7 +4,7 @@ export interface WindowConfig {
 
 export interface TabConfig {
   readonly favIconUrl: string
-  readonly url: string
-  readonly title: string
   readonly index: number
+  readonly title: string
+  readonly url: string
 }

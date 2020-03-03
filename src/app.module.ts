@@ -17,7 +17,18 @@ import { ConfigService } from './config/config.service'
         useFindAndModify: false,
         useNewUrlParser: true,
       }),
+      connectionName: 'stew',
       inject: [ConfigService],
+  }),
+  MongooseModule.forRootAsync({
+    imports: [ConfigModule],
+    useFactory: async (configService: ConfigService) => ({
+      uri: configService.get('MONGODB_URI_HISTORY'),
+      useFindAndModify: false,
+      useNewUrlParser: true,
+    }),
+    connectionName: 'stew_history',
+    inject: [ConfigService],
   }),
   AuthModule, AccountModule, RecipeModule],
   controllers: [AppController],

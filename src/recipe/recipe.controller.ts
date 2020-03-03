@@ -1,11 +1,11 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Req, Patch } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Req, Patch, Delete } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './recipe-payload.dto'
 import { EditRecipePayloadDto } from './edit-recipe-payload.dto'
+import { DeleteRecipePayloadDto } from './delete-recipe-payload.dto'
 import { Recipe } from './recipe.interface'
-import { request } from 'http'
 
 @Controller('/recipe')
 export class RecipeController {
@@ -32,6 +32,13 @@ export class RecipeController {
     const { user } = req
     const recipes = await this.recipeService.getRecipesByAuthorId(user._id)
     return recipes
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/delete')
+  async deleteRecipeById(@Request() req, @Body() deleteRecipePayloadDto: DeleteRecipePayloadDto): Promise<Recipe> {
+    const { user } = req
+    return await this.recipeService.deleteRecipe(user, deleteRecipePayloadDto._id)
   }
 
 }

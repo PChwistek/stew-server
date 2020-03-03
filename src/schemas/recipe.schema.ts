@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose'
-// import { WindowConfig } from '../recipe/windowConfig.interface'
 
 export const RecipeSchema = new mongoose.Schema({
   name: String,
@@ -8,4 +7,19 @@ export const RecipeSchema = new mongoose.Schema({
   tags: Object,
   attributes: Array,
   config: Array,
+  dateCreated: Date,
+  dateModified: Date,
+})
+
+export const RecipeHistorySchema = new mongoose.Schema({
+  recipeId: String,
+  name: String,
+  author: String,
+  authorId: String,
+  tags: Object,
+  attributes: Array,
+  config: Array,
+  dateCreated: Date,
+  dateModified: Date,
+  _recipeV: Number,
 })
