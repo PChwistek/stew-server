@@ -40,7 +40,6 @@ export class AuthService {
   async login(account: LoginAccountDto) {
     const payload = { email: account.email, sub: 'the_secret_sauce_09013?//1' }
     const user = await this.accountService.findOneByEmail(account.email)
-    console.log('user', user)
     return {
       username: user.username,
       lastUpdated: user.lastUpdated,

@@ -1,4 +1,4 @@
-import { RecipePayloadDto } from './recipe-payload.dto'
+import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 
 export class RecipeDto extends RecipePayloadDto {
   readonly author: string

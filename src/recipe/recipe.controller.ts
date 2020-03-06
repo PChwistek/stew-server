@@ -1,10 +1,11 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Req, Patch, Delete } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Patch } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { RecipeService } from './recipe.service'
-import { RecipePayloadDto } from './recipe-payload.dto'
-import { EditRecipePayloadDto } from './edit-recipe-payload.dto'
-import { DeleteRecipePayloadDto } from './delete-recipe-payload.dto'
+import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
+import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
+import { DeleteRecipePayloadDto } from './Payloads/delete-recipe-payload.dto'
+import { SyncRecipePayloadDto } from './sync-recipe-payload.dto'
 import { Recipe } from './recipe.interface'
 
 @Controller('/recipe')
@@ -32,6 +33,13 @@ export class RecipeController {
     const { user } = req
     const recipes = await this.recipeService.getRecipesByAuthorId(user._id)
     return recipes
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/sync')
+  async syncRecipes(@Request() req, @Body() syncRecipePayloadDto: SyncRecipePayloadDto) {
+    const { user } = req
+    return await this.recipeService.syncRecipes(user._id, syncRecipePayloadDto.lastUpdated, syncRecipePayloadDto.isForced)
   }
 
   @UseGuards(AuthGuard('jwt'))

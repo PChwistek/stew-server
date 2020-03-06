@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator'
-import { WindowConfig } from './windowConfig.interface'
+import { WindowConfig } from '../windowConfig.interface'
 
 export class RecipePayloadDto {
 

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { RecipeService } from './recipe.service'
-import { RecipeController } from './recipe.controller'
-import { RecipeSchema, RecipeHistorySchema } from '../schemas/recipe.schema'
-import { AccountModule } from '../account/account.module'
+import { RecipeService } from '../recipe.service'
+import { RecipeController } from '../recipe.controller'
+import { RecipeSchema, RecipeHistorySchema } from '../../schemas/recipe.schema'
+import { AccountModule } from '../../account/account.module'
 
 @Module({
   imports: [

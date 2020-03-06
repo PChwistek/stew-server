@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator'
-import { RecipePayloadDto } from './recipe-payload.dto'
+import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { Recipe } from './recipe.interface'
 
 export class RecipeHistoryDto extends RecipePayloadDto {

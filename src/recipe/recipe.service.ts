@@ -3,11 +3,11 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Injectable } from '@nestjs/common'
 import { Recipe, RecipeHistory } from './recipe.interface'
 
-import { RecipePayloadDto } from './recipe-payload.dto'
+import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { Account } from '../account/account.interface'
 import { RecipeDto } from './recipe.dto'
 import { AccountService } from '../account/account.service'
-import { EditRecipePayloadDto } from './edit-recipe-payload.dto'
+import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
 import { RecipeHistoryDto } from './recipe-history.dto'
 
 @Injectable()
@@ -49,6 +49,19 @@ export class RecipeService {
 
   async getRecipesByAuthorId(_id: string) {
     return await this.recipeModel.find({ authorId: _id }).exec()
+  }
+
+  async syncRecipes(userId: string, updated: Date, forced: boolean) {
+    const theUser = await this.accountService.findOneById(userId)
+    if (new Date(theUser.lastUpdated) > new Date(updated) || forced) {
+      const recipes =  await this.recipeModel.find({ authorId: userId }).exec()
+      return {
+        upToDate: false,
+        lastUpdated: theUser.lastUpdated,
+        recipes,
+      }
+    }
+    return { upToDate: true, lastUpdated: theUser.lastUpdated, recipes: [] }
   }
 
 }
