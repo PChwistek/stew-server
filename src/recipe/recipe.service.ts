@@ -8,6 +8,7 @@ import { Account } from '../account/account.interface'
 import { RecipeDto } from './recipe.dto'
 import { AccountService } from '../account/account.service'
 import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
+import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
 import { RecipeHistoryDto } from './recipe-history.dto'
 
 @Injectable()
@@ -47,6 +48,11 @@ export class RecipeService {
     return await recipeDeletedModel.save()
   }
 
+  async addRecipeToFavorites(user: Account, addAsFavorite: AddRecipeFavoriteDto) {
+    await this.accountService.setFavorite(user._id, addAsFavorite.recipeId, addAsFavorite.isNew)
+    await this.accountService.setUpdatedTime(user._id)
+  }
+
   async getRecipesByAuthorId(_id: string) {
     return await this.recipeModel.find({ authorId: _id }).exec()
   }
@@ -59,6 +65,7 @@ export class RecipeService {
         upToDate: false,
         lastUpdated: theUser.lastUpdated,
         recipes,
+        favoriteRecipes: theUser.favoriteRecipes,
       }
     }
     return { upToDate: true, lastUpdated: theUser.lastUpdated, recipes: [] }

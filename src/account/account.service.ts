@@ -24,6 +24,20 @@ export class AccountService {
     return await this.accountModel.findOneAndUpdate({ _id }, { lastUpdated: new Date() }, { returnOriginal: false })
   }
 
+  async setFavorite(_id: string, recipeId: string, isNew: boolean): Promise<Account> {
+    const user = await this.accountModel.findOne({ _id })
+    const { favoriteRecipes } = user
+    if (isNew) {
+      if(favoriteRecipes.indexOf(fav => fav === recipeId) == -1) {
+        favoriteRecipes.push(recipeId)
+      }
+    } else {
+      const tempIndex = favoriteRecipes.findIndex(fav => fav === recipeId)
+      favoriteRecipes.splice(tempIndex, 1)
+    }
+    return await this.accountModel.findOneAndUpdate({ _id }, { favoriteRecipes }, { returnOriginal: false})
+  }
+
   async findOneById(_id: string): Promise<Account> {
     return await this.accountModel.findOne({ _id }).exec()
   }
