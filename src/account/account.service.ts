@@ -16,6 +16,10 @@ export class AccountService {
     return createdAccount
   }
 
+  async addProfile(_id: string, displayName: string): Promise<Account> {
+    return await this.accountModel.findOneAndUpdate({ _id }, { username: displayName }, { returnOriginal: false})
+  }
+
   async findAll(): Promise<Account[]> {
     return await this.accountModel.find().exec()
   }

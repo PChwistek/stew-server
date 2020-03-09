@@ -15,26 +15,10 @@ export class AuthController {
     return this.authService.login(loginAccountDto)
   }
 
-  @Post('/register')
-  async createAccount(@Body() payloadAccountDto: AccountPayloadDto) {
-    const exists = await this.authService.userExists(payloadAccountDto.email)
-    if (!exists) {
-      return this.authService.createUser(payloadAccountDto)
-    }
-
-    throw new BadRequestException('Account with this email already exists')
-  }
-
   @UseGuards(AuthGuard('jwt'))
   @Get('/validate')
   async checkToken() {
     return true
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user
   }
 
 }
