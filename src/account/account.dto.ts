@@ -1,18 +1,24 @@
-import { CreateAccountDto } from './create-account.dto'
+import { AccountPayloadDto } from './account-payload.dto'
 
 export class AccountDto {
   readonly email: string
   readonly passwordHash: string
-  karma: number
+  username: string
   dateCreated: Date
   favoriteRecipes: Array<string>
+  lastUpdated: Date
 
-  constructor(createAccountDto: CreateAccountDto) {
-    this.email = createAccountDto.email
-    this.passwordHash = createAccountDto.passwordHash
-    this.karma = 0
+  constructor(email, passwordHash, username) {
+    this.email = email
+    this.passwordHash = passwordHash
+    this.username = username
     this.dateCreated = new Date()
     this.favoriteRecipes = []
+    this.lastUpdated = new Date()
+  }
+
+  updateLastUpdated() {
+    this.lastUpdated = new Date()
   }
 
 }

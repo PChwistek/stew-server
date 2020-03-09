@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from './auth/auth.module'
 import { AccountModule } from './account/account.module'
 import { ConfigModule } from './config/config.module'
+import { RecipeModule } from './recipe/recipe.module'
 import { ConfigService } from './config/config.service'
 
 @Module({
@@ -13,11 +14,14 @@ import { ConfigService } from './config/config.service'
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get('MONGODB_URI'),
+        useFindAndModify: false,
         useNewUrlParser: true,
+        useUnifiedTopology: true,
       }),
+      connectionName: 'stew',
       inject: [ConfigService],
   }),
-  AuthModule, AccountModule],
+  AuthModule, AccountModule, RecipeModule],
   controllers: [AppController],
   providers: [AppService],
 })
