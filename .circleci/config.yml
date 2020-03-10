@@ -30,8 +30,9 @@ jobs:
 
     # Docker environment where we gonna run our build deployment scripts 
     docker:
-    - image: circleci/node:8.11
-
+      - image: circleci/node:11.3
+    environment:
+      - NODE_ENV: production
     steps:
     - checkout
 
