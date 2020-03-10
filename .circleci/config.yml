@@ -31,7 +31,7 @@ jobs:
       - NODE_ENV: production
     # Docker environment where we gonna run our build deployment scripts 
     docker:
-    - image: circleci/node:8.11
+    - image: circleci/node:11.3
 
     steps:
     - checkout
@@ -60,6 +60,7 @@ jobs:
           sudo apt-get install python-pip python-dev build-essential
           sudo pip install --upgrade pip 
           sudo pip install --upgrade setuptools
+          sudo python -m easy_install --upgrade pyOpenSSL
           sudo pip install awsebcli --upgrade
     # !!! This runs a deployment
     - run:
