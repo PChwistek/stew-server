@@ -10,7 +10,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe())
   app.use(helmet())
   app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'tiny' ))
-  await app.listen(3009)
-
+  await app.listen(process.env.NODE_ENV === 'development' ? 3009 : 8081)
 }
 bootstrap()
