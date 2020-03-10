@@ -1,79 +1,17 @@
-version: 2
+version: 2.1
+orbs:
+  node: circleci/node@1.1.6
 jobs:
-  build: 
-    working_directory: ~/app
-    # Docker environment where we gonna run our build deployment scripts 
-    docker:
-    - image: circleci/node:11.3
+  build-and-test:
+    executor:
+      name: node/default
     steps:
       - checkout
-      - run:
-          name: Update NPM version
-          command: 'sudo npm install -g yarn@latest'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-      - run:
-          name: Install dependencies
-          command: npm ci
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
-      - run:
-          name: Build
-          command: yarn build
-        
-  deploy:
-    # This is a directory where all your repo content will be placed. 
-    # Name is not that important at this case.
-    working_directory: ~/app
-
-    # Docker environment where we gonna run our build deployment scripts 
-    docker:
-    - image: circleci/node:11.3
-
-    steps:
-    - checkout
-
-    # Download and cache dependencies
-    - restore_cache:
-        keys:
-        - v1-dependencies-{{ checksum "package.json" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
-    
-    # Install npm dependencies 🙂
-    - run: yarn install
-
-    # Make things faster
-    - save_cache:
-        paths:
-        - node_modules
-        key: v1-dependencies-{{ checksum "package.json" }}
-    
-    # run tests!
-    - run: yarn test
-
-    # !!! This installs AWS Elastic Beanstalk CLI 'awsebcli' !!!
-    - run:
-        name: Installing deployment dependencies
-        working_directory: /
-        command: |
-          sudo apt-get -y -qq update
-          sudo apt-get install python-pip python-dev build-essential
-          sudo pip install awsebcli --upgrade
-
-    # !!! This runs a deployment
-    - run:
-        name: Deploying
-        command: eb deploy stew-server-env
-
+      - node/with-cache:
+          steps:
+            - run: yarn install
+            - run: yarn test
 workflows:
-  version: 2
-  build:
-    jobs:
-    - deploy:
-        filters:
-          branches:
-            only:
-            - master
+    build-and-test:
+      jobs:
+        - build-and-test
