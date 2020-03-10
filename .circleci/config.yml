@@ -56,9 +56,10 @@ jobs:
     - run:
         name: Installing deployment dependencies
         command: |
-          sudo apt update
-          sudo apt install -y python-pip python-dev
-          sudo pip install awsebcli
+          sudo apt-get -y -qq update
+          sudo apt-get install python-pip python-dev build-essential
+          sudo pip install --upgrade setuptools
+          sudo pip install awsebcli --upgrade
     # !!! This runs a deployment
     - run:
         name: Deploying
