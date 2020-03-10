@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
-  aws-code-deploy: circleci/aws-code-deploy@0.0.11
 jobs:
   build_dev:
     docker:
@@ -56,12 +55,11 @@ jobs:
     # !!! This installs AWS Elastic Beanstalk CLI 'awsebcli' !!!
     - run:
         name: Installing deployment dependencies
-        working_directory: /
         command: |
-          sudo apt-get -y -qq update
-          sudo apt-get install python-pip python-dev build-essential
-          sudo pip install awsebcli
-    # !!! This runs a deployment
+          build-essential zlib1g-dev libssl-dev libncurses-dev libffi-dev libsqlite3-dev libreadline-dev libbz2-dev
+          git clone https://github.com/aws/aws-elastic-beanstalk-cli-setup.git          
+          ./aws-elastic-beanstalk-cli-setup/scripts/bundled_installer   
+        # !!! This runs a deployment
     - run:
         name: Deploying
         command: eb deploy stew-server-env
