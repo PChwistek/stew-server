@@ -66,13 +66,11 @@ jobs:
   
 workflows:
   version: 2
-  build_and_test:
+  build_test_deploy:
     jobs:
-      - build_dev
-  build_and_deploy:
-    jobs:
-      - deploy
-        filters:
-          branches:
-            only:
-            - master
+    - build_dev
+    - deploy
+      filters:
+        branches:
+          only:
+          - master
