@@ -7,8 +7,6 @@ jobs:
       # specify the version you desire here
       - image: circleci/node:11.3
     working_directory: ~/stew
-    steps:
-      - checkout
     environment:
       - NODE_ENV: development
     steps:
