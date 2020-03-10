@@ -34,7 +34,8 @@ export class AuthController {
   async createAccount(@Body() payloadAccountDto: AccountPayloadDto) {
     const exists = await this.authService.userExists(payloadAccountDto.email)
     if (!exists) {
-      return this.authService.createUser(payloadAccountDto)
+      await this.authService.createUser(payloadAccountDto)
+      return this.authService.login(new LoginAccountDto(payloadAccountDto.email, payloadAccountDto.password))
     }
 
     throw new BadRequestException('Account with this email already exists')

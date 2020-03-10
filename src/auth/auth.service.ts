@@ -33,8 +33,7 @@ export class AuthService {
     const saltRounds = 10
     const hash = await bcrypt.hash(payloadAccountDto.password, saltRounds)
     const passwordHash = hash
-    await this.accountService.create(payloadAccountDto, passwordHash)
-    return this.login(new LoginAccountDto(payloadAccountDto.email, payloadAccountDto.password))
+    return await this.accountService.create(payloadAccountDto, passwordHash)
   }
 
   async login(account: LoginAccountDto) {

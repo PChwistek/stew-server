@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty , IsLowercase} from 'class-validator'
+import { IsEmail, IsNotEmpty , IsLowercase, Length} from 'class-validator'
 
 export class AccountPayloadDto {
 
@@ -7,6 +7,7 @@ export class AccountPayloadDto {
   @IsLowercase()
   readonly email: string
 
+  @Length(6, 30)
   @IsNotEmpty()
   readonly password: string
 
