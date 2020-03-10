@@ -71,7 +71,7 @@ workflows:
     jobs:
     - build_dev
     - test
-    - deploy
+    - deploy:
       filters:
         branches:
           only:
