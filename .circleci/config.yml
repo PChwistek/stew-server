@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
+  aws-code-deploy: circleci/aws-code-deploy@0.0.11
 jobs:
   build_dev:
     docker:
@@ -26,13 +27,13 @@ jobs:
   deploy:
     # This is a directory where all your repo content will be placed. 
     # Name is not that important at this case.
-    working_directory: ~/app
-
-    # Docker environment where we gonna run our build deployment scripts 
-    docker:
-      - image: circleci/node:11.3
+    working_directory: ~/stew
     environment:
       - NODE_ENV: production
+    # Docker environment where we gonna run our build deployment scripts 
+    docker:
+    - image: circleci/node:8.11
+
     steps:
     - checkout
 
@@ -60,9 +61,11 @@ jobs:
           sudo apt-get -y -qq update
           sudo apt-get install python-pip python-dev build-essential
           sudo pip install awsebcli --upgrade
+    # !!! This runs a deployment
     - run:
-      name: Deploying
-      command: eb deploy stew-server-env
+        name: Deploying
+        command: eb deploy stew-server-env
+
   
 workflows:
   version: 2
