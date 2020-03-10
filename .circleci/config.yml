@@ -18,12 +18,11 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run: npm install
+      - run: npm test
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-  test:
-    - run: npm test
   deploy:
     # This is a directory where all your repo content will be placed. 
     # Name is not that important at this case.
@@ -70,7 +69,6 @@ workflows:
   build_test_deploy:
     jobs:
     - build_dev
-    - test
     - deploy:
       filters:
         branches:
