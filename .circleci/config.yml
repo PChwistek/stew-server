@@ -1,5 +1,28 @@
 version: 2
 jobs:
+  build: 
+    working_directory: ~/app
+    # Docker environment where we gonna run our build deployment scripts 
+    docker:
+    - image: circleci/node:11.3
+    steps:
+      - checkout
+      - run:
+          name: Update NPM version
+          command: 'sudo npm install -g yarn@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Build
+          command: yarn build
+        
   deploy:
     # This is a directory where all your repo content will be placed. 
     # Name is not that important at this case.
@@ -21,7 +44,6 @@ jobs:
     
     # Install npm dependencies 🙂
     - run: yarn install
-    
 
     # Make things faster
     - save_cache:
