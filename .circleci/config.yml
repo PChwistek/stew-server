@@ -56,10 +56,11 @@ jobs:
     - run:
         name: Installing deployment dependencies
         command: |
-          build-essential zlib1g-dev libssl-dev libncurses-dev libffi-dev libsqlite3-dev libreadline-dev libbz2-dev
-          git clone https://github.com/aws/aws-elastic-beanstalk-cli-setup.git          
-          ./aws-elastic-beanstalk-cli-setup/scripts/bundled_installer   
-        # !!! This runs a deployment
+          sudo apt-get -y -qq update
+          sudo apt-get install python-pip python-dev build-essential
+          sudo pip install --upgrade setuptools
+          sudo pip install awsebcli --upgrade
+    # !!! This runs a deployment
     - run:
         name: Deploying
         command: eb deploy stew-server-env
