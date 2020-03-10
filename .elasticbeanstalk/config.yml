@@ -1,9 +1,0 @@
-branch-defaults:
-  master:
-    environment: stew-server-env
-global:
-  application_name: stew
-  default_ec2_keyname: e-ydgtnevmgs
-  default_platform: Node.js running on 64bit Amazon Linux/4.13.1
-  default_region: us-west-1
-  sc: git
