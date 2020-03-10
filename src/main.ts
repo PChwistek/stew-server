@@ -6,7 +6,9 @@ import * as morgan from 'morgan'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  app.enableCors()
+  process.env.NODE_ENV === 'development'
+    ? app.enableCors({credentials: true, origin: 'http://localhost:3000'})
+    : app.enableCors()
   app.useGlobalPipes(new ValidationPipe())
   app.use(helmet())
   app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'tiny' ))
