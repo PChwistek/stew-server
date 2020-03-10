@@ -24,47 +24,46 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-  deploy:
-    # This is a directory where all your repo content will be placed. 
-    # Name is not that important at this case.
-    working_directory: ~/stew
-    environment:
-      - NODE_ENV: production
-    # Docker environment where we gonna run our build deployment scripts 
-    docker:
-    - image: circleci/node:8.11
+  # deploy:
+  #   # This is a directory where all your repo content will be placed. 
+  #   # Name is not that important at this case.
+  #   working_directory: ~/stew
+  #   environment:
+  #     - NODE_ENV: production
+  #   # Docker environment where we gonna run our build deployment scripts 
+  #   docker:
+  #   - image: circleci/node:8.11
 
-    steps:
-    - checkout
+  #   steps:
+  #   - checkout
 
-    # Download and cache dependencies
-    - restore_cache:
-        keys:
-        - v1-dependencies-{{ checksum "package.json" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+  #   # Download and cache dependencies
+  #   - restore_cache:
+  #       keys:
+  #       - v1-dependencies-{{ checksum "package.json" }}
+  #       # fallback to using the latest cache if no exact match is found
+  #       - v1-dependencies-
     
-    # Install npm dependencies 🙂
-    - run: npm install
-    - run: npm build
-    # Make things faster
-    - save_cache:
-        paths:
-        - node_modules
-        key: v1-dependencies-{{ checksum "package.json" }}
+  #   - run: npm install
+  #   - run: npm build
+  #   # Make things faster
+  #   - save_cache:
+  #       paths:
+  #       - node_modules
+  #       key: v1-dependencies-{{ checksum "package.json" }}
 
-    # !!! This installs AWS Elastic Beanstalk CLI 'awsebcli' !!!
-    - run:
-        name: Installing deployment dependencies
-        working_directory: /
-        command: |
-          sudo apt-get -y -qq update
-          sudo apt-get install python-pip python-dev build-essential
-          sudo pip install awsebcli==3.14.11
-    # !!! This runs a deployment
-    - run:
-        name: Deploying
-        command: eb deploy stew-server-env
+  #   # !!! This installs AWS Elastic Beanstalk CLI 'awsebcli' !!!
+  #   - run:
+  #       name: Installing deployment dependencies
+  #       working_directory: /
+  #       command: |
+  #         sudo apt-get -y -qq update
+  #         sudo apt-get install python-pip python-dev build-essential
+  #         sudo pip install awsebcli==3.14.11
+  #   # !!! This runs a deployment
+  #   - run:
+  #       name: Deploying
+  #       command: eb deploy stew-server-env
 
   
 workflows:
@@ -72,8 +71,8 @@ workflows:
   build_test_deploy:
     jobs:
     - build_dev
-    - deploy:
-      filters:
-        branches:
-          only:
-          - master
+    # - deploy:
+    #   filters:
+    #     branches:
+    #       only:
+    #       - master
