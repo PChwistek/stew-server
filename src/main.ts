@@ -7,12 +7,12 @@ import * as morgan from 'morgan'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   process.env.NODE_ENV === 'development'
-    ? app.enableCors({credentials: true, origin: 'http://localhost:3000'})
+    ? app.enableCors({credentials: true, origin: 'http://localhost:3009'})
     : app.enableCors()
   app.useGlobalPipes(new ValidationPipe())
   app.use(helmet())
   app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'tiny' ))
-  const port = process.env.NODE_ENV === 'development' ? 3009 : 80
+  const port = process.env.PORT || 3000
   await app.listen(port)
   console.log('Started on ' + port)
 }
