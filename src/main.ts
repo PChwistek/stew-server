@@ -12,7 +12,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe())
   app.use(helmet())
   app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'tiny' ))
-  const port = process.env.NODE_ENV === 'development' ? 3009 : 3000
+  const port = process.env.NODE_ENV === 'development' ? 3009 : 80
   await app.listen(port)
   console.log('Started on ' + port)
 }
