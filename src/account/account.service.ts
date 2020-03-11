@@ -32,7 +32,7 @@ export class AccountService {
     const user = await this.accountModel.findOne({ _id })
     const { favoriteRecipes } = user
     if (isNew) {
-      if(favoriteRecipes.indexOf(fav => fav === recipeId) == -1) {
+      if(favoriteRecipes.indexOf(fav => fav === recipeId) === -1) {
         favoriteRecipes.push(recipeId)
       }
     } else {
