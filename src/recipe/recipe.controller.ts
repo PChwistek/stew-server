@@ -50,7 +50,6 @@ export class RecipeController {
     return await this.recipeService.addRecipeToFavorites(user, addAsFavorite)
   }
 
-
   @UseGuards(AuthGuard('jwt'))
   @Post('/delete')
   async deleteRecipeById(@Request() req, @Body() deleteRecipePayloadDto: DeleteRecipePayloadDto): Promise<Recipe> {
