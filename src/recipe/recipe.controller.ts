@@ -5,7 +5,7 @@ import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
 import { DeleteRecipePayloadDto } from './Payloads/delete-recipe-payload.dto'
-import { SyncRecipePayloadDto } from './sync-recipe-payload.dto'
+import { SyncRecipePayloadDto } from './Payloads/sync-recipe-payload.dto'
 import { Recipe } from './recipe.interface'
 import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
 
@@ -49,7 +49,6 @@ export class RecipeController {
     const { user } = req
     return await this.recipeService.addRecipeToFavorites(user, addAsFavorite)
   }
-
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/delete')
