@@ -1,8 +1,7 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Req } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { AccountService } from './account.service'
-import { request } from 'http'
 import { ProfilePayloadDto } from './profile-payload.dto'
 
 @Controller('/account')
