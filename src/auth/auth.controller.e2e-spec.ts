@@ -51,6 +51,47 @@ describe('Auth Controller e2e', () => {
       .expect(hasKeys)
   })
 
+  it(`can validate proper register - /auth/register POST`, () => {
+
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: '234234124fasdfasf1',
+        password: '123',
+      })
+      .expect(400)
+  })
+
+  it(`can deal with duplicate email registration - /auth/register POST`, () => {
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: 'end-to-end@gmail.com',
+        password: '1234567',
+      })
+      .expect(400)
+  })
+
+  it(`can deal with bad passwords - /auth/register POST`, () => {
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: 'end-to-end2@gmail.com',
+        password: '123',
+      })
+      .expect(400)
+  })
+
+  it(`can handle incorrect login - /auth/login POST`, async () => {
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: generatedEmail,
+        password: '123467',
+      })
+      .expect(401)
+  })
+
   it(`can login - /auth/login POST`, async () => {
 
     function hasKeys(res) {
@@ -76,6 +117,12 @@ describe('Auth Controller e2e', () => {
       .get('/auth/validate')
       .set('Authorization', `Bearer ${jwt}`)
       .expect('true')
+  })
+  it(`can reject bad token - /auth/validate GET`, () => {
+    return request(app.getHttpServer())
+      .get('/auth/validate')
+      .set('Authorization', `Bearer ${12341}`)
+      .expect(401)
   })
 
   it(`can get profile - /auth/profile GET`, () => {
