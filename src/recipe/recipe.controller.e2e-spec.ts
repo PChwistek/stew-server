@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { INestApplication } from '@nestjs/common'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
+import { getJwt } from '../../test/getJwtOrCreate'
 
 const theRecipe = {
     name: 'e2etest_recipe',
@@ -48,14 +49,7 @@ describe('Recipe Controller e2e', () => {
     app = moduleRef.createNestApplication()
     await app.init()
 
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'end-to-end@gmail.com',
-        password: '123456',
-      })
-
-    jwt = response.body.access_token
+    jwt = await getJwt(app)
   })
 
   it(`can create - /recipe/create POST`, async () => {
