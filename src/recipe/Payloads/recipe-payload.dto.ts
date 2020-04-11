@@ -12,11 +12,14 @@ export class RecipePayloadDto {
   @IsNotEmpty()
   readonly config: Array<WindowConfig>
 
-  constructor(name, tags, attributes, config) {
+  readonly permissions: Array<string>
+
+  constructor(name, tags, attributes, config, permissions) {
     this.name = name
     this.tags = tags
     this.attributes = attributes
     this.config = config
+    this.permissions = permissions
   }
 
 }

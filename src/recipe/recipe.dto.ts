@@ -12,6 +12,7 @@ export class RecipeDto extends RecipePayloadDto {
       recipePayloadDto.tags,
       recipePayloadDto.attributes,
       recipePayloadDto.config,
+      recipePayloadDto.permissions,
     )
     this.author = author
     this.authorId = authorId

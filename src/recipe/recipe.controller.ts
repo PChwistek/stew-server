@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Patch } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, BadRequestException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
@@ -48,6 +48,16 @@ export class RecipeController {
   async addAsFavorite(@Request() req, @Body() addAsFavorite: AddRecipeFavoriteDto) {
     const { user } = req
     return await this.recipeService.addRecipeToFavorites(user, addAsFavorite)
+  }
+
+  @Get('/share/:id')
+  async getRecipeByShareId(@Param() params) {
+
+    const response = await this.recipeService.getRecipeByShareId(params.id)
+    if (response.length < 1) {
+      throw new BadRequestException()
+    }
+    return response
   }
 
   @UseGuards(AuthGuard('jwt'))

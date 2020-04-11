@@ -17,7 +17,7 @@ export class RecipeHistoryDto extends RecipePayloadDto {
   readonly dateModified: Date
 
   constructor(oldRecipe: Recipe) {
-    super(oldRecipe.name, oldRecipe.tags, oldRecipe.attributes, oldRecipe.config)
+    super(oldRecipe.name, oldRecipe.tags, oldRecipe.attributes, oldRecipe.config, oldRecipe.permissions)
     this.dateModified = new Date()
     this.dateCreated = oldRecipe.dateCreated
     this.recipeId = oldRecipe._id

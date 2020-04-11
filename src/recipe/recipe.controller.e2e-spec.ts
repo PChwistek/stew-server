@@ -21,12 +21,14 @@ const theRecipe = {
         index: 0,
       }],
     }],
+    permissions: [],
 }
 
 describe('Recipe Controller e2e', () => {
   let app: INestApplication
   let jwt = ''
   let recipeId = ''
+  let shareId = ''
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -76,6 +78,7 @@ describe('Recipe Controller e2e', () => {
 
     expect(hasKeys(response))
     recipeId = response.body._id
+    shareId = response.body.shareableId
   })
 
   it(`can edit - /recipe/edit PATCH`, () => {
@@ -102,6 +105,26 @@ describe('Recipe Controller e2e', () => {
       })
       .expect(hasKeys)
   })
+
+  it('can fetch a link-shared recipe - recipe/share/:id', async () => {
+    function hasKeys(res) {
+      if (!('_id' in res.body[0])) throw new Error('missing _id key')
+      if (!('__v' in res.body[0])) throw new Error('missing __v key')
+      if (!('author' in res.body[0])) throw new Error('missing author key')
+      if (!('authorId' in res.body[0])) throw new Error('missing authorId key')
+      if (!('dateCreated' in res.body[0])) throw new Error('missing dateCreated key')
+      if (!('dateModified' in res.body[0])) throw new Error('missing dateModified key')
+      if (!('name' in res.body[0])) throw new Error('missing name key')
+      // if (!('titles' in res.body)) throw new Error('missing titles key')
+      if (!('attributes' in res.body[0])) throw new Error('missing titles key')
+      if (!('config' in res.body[0])) throw new Error('missing titles key')
+    }
+    console.log('shareId', shareId)
+    const response = await request(app.getHttpServer())
+      .get(`/recipe/share/${shareId}`)
+    expect(hasKeys(response))
+})
+
   it(`can get all created recipes by author - /recipe/byAuthor GET`, async () => {
 
     const response = await request(app.getHttpServer())
@@ -177,6 +200,24 @@ describe('Recipe Controller e2e', () => {
         })
         .expect(hasRecipeId)
   })
+
+  it('does not return a deleted recipe - recipe/share/:id', async () => {
+    function hasKeys(res) {
+      if (!('_id' in res.body)) throw new Error('missing _id key')
+      if (!('__v' in res.body)) throw new Error('missing __v key')
+      if (!('author' in res.body)) throw new Error('missing author key')
+      if (!('authorId' in res.body)) throw new Error('missing authorId key')
+      if (!('dateCreated' in res.body)) throw new Error('missing dateCreated key')
+      if (!('dateModified' in res.body)) throw new Error('missing dateModified key')
+      if (!('name' in res.body)) throw new Error('missing name key')
+      // if (!('titles' in res.body)) throw new Error('missing titles key')
+      if (!('attributes' in res.body)) throw new Error('missing titles key')
+      if (!('config' in res.body)) throw new Error('missing titles key')
+    }
+    return request(app.getHttpServer())
+      .get(`/recipe/share/${shareId}`)
+      .expect(400)
+})
 
   afterAll(async () => {
     await app.close()

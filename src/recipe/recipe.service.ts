@@ -1,6 +1,6 @@
 import { Model } from 'mongoose'
 import { InjectModel } from '@nestjs/mongoose'
-import { Injectable } from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
 import { Recipe, RecipeHistory } from './recipe.interface'
 
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
@@ -51,6 +51,10 @@ export class RecipeService {
   async addRecipeToFavorites(user: Account, addAsFavorite: AddRecipeFavoriteDto) {
     await this.accountService.setFavorite(user._id, addAsFavorite.recipeId, addAsFavorite.isNew)
     await this.accountService.setUpdatedTime(user._id)
+  }
+
+  async getRecipeByShareId(id: string) {
+    return await this.recipeModel.find({ shareableId: id }).exec()
   }
 
   async getRecipesByAuthorId(_id: string) {

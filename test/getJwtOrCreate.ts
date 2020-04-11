@@ -18,5 +18,12 @@ export async function getJwt(app) {
       password: '123456',
     })
 
+  await request(app.getHttpServer())
+    .post('/auth/register')
+    .set('Authorization', `Bearer ${response.body.access_token}`)
+    .send({
+      username: 'end-to-end',
+    })
+
   return response.body.access_token
 }

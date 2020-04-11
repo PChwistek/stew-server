@@ -11,6 +11,8 @@ export interface Recipe extends Document {
   readonly tags: Array<string>
   readonly attributes: Array<string>
   readonly config: Array<WindowConfig>
+  readonly shareableId: string,
+  readonly permissions: Array<string>,
 }
 
 export interface RecipeHistory extends Document {
@@ -24,4 +26,6 @@ export interface RecipeHistory extends Document {
   readonly tags: Array<string>
   readonly attributes: Array<string>
   readonly config: Array<WindowConfig>
+  readonly shareableId: string,
+  readonly permissions: Array<string>,
 }
