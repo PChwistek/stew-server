@@ -9,6 +9,7 @@ import { RecipeDto } from './recipe.dto'
 import { AccountService } from '../account/account.service'
 import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
 import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
+import { RecipeByLinkDto } from './Payloads/recipe-by-link.payload.dto'
 import { RecipeHistoryDto } from './recipe-history.dto'
 
 @Injectable()
@@ -53,6 +54,18 @@ export class RecipeService {
     await this.accountService.setUpdatedTime(user._id)
   }
 
+  async addRecipeToImports(user: Account, addAsImport: RecipeByLinkDto) {
+
+    const recipeExists = await this.recipeModel.findOne({ shareableId: addAsImport.recipeId })
+
+    if (recipeExists) {
+      await this.accountService.setImported(user._id, addAsImport.recipeId, addAsImport.adding)
+      await this.accountService.setUpdatedTime(user._id)
+    } else {
+      throw new BadRequestException()
+    }
+  }
+
   async getRecipeByShareId(id: string) {
     return await this.recipeModel.find({ shareableId: id }).exec()
   }
@@ -64,7 +77,13 @@ export class RecipeService {
   async syncRecipes(userId: string, updated: Date, forced: boolean) {
     const theUser = await this.accountService.findOneById(userId)
     if (new Date(theUser.lastUpdated) > new Date(updated) || forced) {
-      const recipes =  await this.recipeModel.find({ authorId: userId }).exec()
+      let recipes =  await this.recipeModel.find({ authorId: userId }).exec()
+
+      for (const shareId of theUser.importedRecipes) {
+        const foundRecipe = await this.recipeModel.findOne({ shareableId: shareId })
+        recipes = recipes.concat(foundRecipe)
+      }
+
       return {
         upToDate: false,
         lastUpdated: theUser.lastUpdated,

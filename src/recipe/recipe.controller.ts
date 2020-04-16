@@ -6,6 +6,7 @@ import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
 import { DeleteRecipePayloadDto } from './Payloads/delete-recipe-payload.dto'
 import { SyncRecipePayloadDto } from './Payloads/sync-recipe-payload.dto'
+import { RecipeByLinkDto } from './Payloads/recipe-by-link.payload.dto'
 import { Recipe } from './recipe.interface'
 import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
 
@@ -58,6 +59,13 @@ export class RecipeController {
       throw new BadRequestException()
     }
     return response
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/share/import')
+  async addRecipeToLibrary(@Request() req, @Body() recipeByLink: RecipeByLinkDto) {
+    const { user } = req
+    return await this.recipeService.addRecipeToImports(user, recipeByLink)
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -31,15 +31,36 @@ export class AccountService {
   async setFavorite(_id: string, recipeId: string, isNew: boolean): Promise<Account> {
     const user = await this.accountModel.findOne({ _id })
     const { favoriteRecipes } = user
+
+    const index = favoriteRecipes.findIndex(fav => fav === recipeId)
     if (isNew) {
-      if(favoriteRecipes.indexOf(fav => fav === recipeId) === -1) {
+      if (index === -1) {
         favoriteRecipes.push(recipeId)
       }
     } else {
-      const tempIndex = favoriteRecipes.findIndex(fav => fav === recipeId)
-      favoriteRecipes.splice(tempIndex, 1)
+      if (index > -1) {
+        favoriteRecipes.splice(index, 1)
+      }
     }
     return await this.accountModel.findOneAndUpdate({ _id }, { favoriteRecipes }, { returnOriginal: false})
+  }
+
+  async setImported(userId: string, shareableRecipeId: string, adding: boolean): Promise<Account> {
+    const user = await this.accountModel.findOne({ _id: userId })
+    const { importedRecipes } = user
+
+    const index = importedRecipes.findIndex(toAdd => toAdd === shareableRecipeId)
+    if (adding) {
+      if (index === -1) {
+        importedRecipes.push(shareableRecipeId)
+      } else {
+      }
+    } else {
+      if(index > -1) {
+        importedRecipes.splice(index, 1)
+      }
+    }
+    return await this.accountModel.findOneAndUpdate({ _id: userId }, { importedRecipes }, { returnOriginal: false })
   }
 
   async findOneById(_id: string): Promise<Account> {
