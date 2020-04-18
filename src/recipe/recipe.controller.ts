@@ -9,6 +9,7 @@ import { SyncRecipePayloadDto } from './Payloads/sync-recipe-payload.dto'
 import { RecipeByLinkDto } from './Payloads/recipe-by-link.payload.dto'
 import { Recipe } from './recipe.interface'
 import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
+import { request } from 'http'
 
 @Controller('/recipe')
 export class RecipeController {
@@ -51,14 +52,26 @@ export class RecipeController {
     return await this.recipeService.addRecipeToFavorites(user, addAsFavorite)
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get('/share/:id')
-  async getRecipeByShareId(@Param() params) {
-
-    const response = await this.recipeService.getRecipeByShareId(params.id)
-    if (response.length < 1) {
+  async getRecipeByShareId(@Request() req, @Param() params) {
+    // check if already imported or is owned by
+    const { user } = req
+    const recipe = await this.recipeService.getRecipeByShareId(params.id)
+    if (recipe.length < 1) {
       throw new BadRequestException()
     }
-    return response
+    if (recipe.authorId === user._id || user.importedRecipes.findIndex(shareId => params.id === shareId) > -1) {
+      return {
+        recipe,
+        alreadyInLibrary: true,
+      }
+    }
+
+    return {
+      recipe,
+      alreadyInLibrary: false,
+    }
   }
 
   @UseGuards(AuthGuard('jwt'))

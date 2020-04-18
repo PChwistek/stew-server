@@ -31,6 +31,14 @@ export class RecipeService {
   async editRecipe(user: Account, editRecipePayloadDto: EditRecipePayloadDto): Promise<Recipe> {
     await this.accountService.setUpdatedTime(user._id)
     const _id = editRecipePayloadDto._id
+    const theRecipe = this.recipeModel.find({ _id: editRecipePayloadDto._id })
+    const { shareableId } = theRecipe
+    if (theRecipe.authorId !== user._id) {
+      const { name, tags, attributes, config, permissions } = editRecipePayloadDto
+      await this.accountService.setImported(user._id, shareableId, false)
+      return await this.createRecipe(user, new RecipePayloadDto(name, tags, attributes, config, permissions, shareableId))
+    }
+
     const oldRecipe = await this.recipeModel.findOneAndUpdate({ _id }, {
         ...editRecipePayloadDto,
         dateModified: new Date(),

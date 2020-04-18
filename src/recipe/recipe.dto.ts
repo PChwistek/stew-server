@@ -13,6 +13,7 @@ export class RecipeDto extends RecipePayloadDto {
       recipePayloadDto.attributes,
       recipePayloadDto.config,
       recipePayloadDto.permissions,
+      recipePayloadDto.forkedFromId,
     )
     this.author = author
     this.authorId = authorId

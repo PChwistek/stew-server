@@ -56,7 +56,7 @@ export class AccountService {
       } else {
       }
     } else {
-      if(index > -1) {
+      if (index > -1) {
         importedRecipes.splice(index, 1)
       }
     }

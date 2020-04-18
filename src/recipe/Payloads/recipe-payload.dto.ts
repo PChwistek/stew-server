@@ -14,12 +14,15 @@ export class RecipePayloadDto {
 
   readonly permissions: Array<string>
 
-  constructor(name, tags, attributes, config, permissions) {
+  readonly forkedFromId: string
+
+  constructor(name, tags, attributes, config, permissions, forkedFromId) {
     this.name = name
     this.tags = tags
     this.attributes = attributes
     this.config = config
     this.permissions = permissions
+    this.forkedFromId = forkedFromId || ''
   }
 
 }

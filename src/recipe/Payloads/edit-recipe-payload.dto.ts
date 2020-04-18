@@ -6,8 +6,10 @@ export class EditRecipePayloadDto extends RecipePayloadDto {
   @IsNotEmpty()
   readonly _id: string
 
-  constructor(id, name, tags, attributes, config, permissions) {
-    super(name, tags, attributes, config, permissions)
+  forkedFromId: string
+
+  constructor(id, name, tags, attributes, config, permissions, forkedFromId) {
+    super(name, tags, attributes, config, permissions, forkedFromId)
     this._id = id
   }
 
