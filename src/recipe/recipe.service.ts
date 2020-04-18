@@ -35,7 +35,6 @@ export class RecipeService {
     const { shareableId } = theRecipe
     if (theRecipe.authorId !== user._id) {
       const { name, tags, attributes, config, permissions } = editRecipePayloadDto
-      await this.accountService.setImported(user._id, shareableId, false)
       return await this.createRecipe(user, new RecipePayloadDto(name, tags, attributes, config, permissions, shareableId))
     }
 
@@ -51,6 +50,14 @@ export class RecipeService {
   }
 
   async deleteRecipe(user: Account, idOfRecipeToDelete: string): Promise<Recipe> {
+
+    const theRecipe = await this.recipeModel.findOne({ _id: idOfRecipeToDelete})
+
+    if (theRecipe.authorId !== user._id) {
+      this.accountService.setImported(user._id, theRecipe.shareableId, false)
+      return theRecipe
+    }
+
     const oldRecipe = await this.recipeModel.findOneAndDelete({ _id: idOfRecipeToDelete })
     const toHistory = new RecipeHistoryDto(oldRecipe)
     const recipeDeletedModel = new this.recipeDeletedModel(toHistory)
@@ -64,9 +71,9 @@ export class RecipeService {
 
   async addRecipeToImports(user: Account, addAsImport: RecipeByLinkDto) {
 
-    const recipeExists = await this.recipeModel.findOne({ shareableId: addAsImport.recipeId })
+    const theRecipe = await this.recipeModel.findOne({ shareableId: addAsImport.recipeId })
 
-    if (recipeExists) {
+    if (theRecipe) {
       await this.accountService.setImported(user._id, addAsImport.recipeId, addAsImport.adding)
       await this.accountService.setUpdatedTime(user._id)
     } else {

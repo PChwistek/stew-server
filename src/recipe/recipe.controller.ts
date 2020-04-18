@@ -61,16 +61,11 @@ export class RecipeController {
     if (recipe.length < 1) {
       throw new BadRequestException()
     }
-    if (recipe.authorId === user._id || user.importedRecipes.findIndex(shareId => params.id === shareId) > -1) {
-      return {
-        recipe,
-        alreadyInLibrary: true,
-      }
-    }
 
+    const alreadyInLibrary = recipe[0].authorId === `${user._id}` || user.importedRecipes.findIndex(shareId => params.id === shareId) > -1
     return {
       recipe,
-      alreadyInLibrary: false,
+      alreadyInLibrary,
     }
   }
 
