@@ -33,7 +33,8 @@ export class RecipeService {
     const _id = editRecipePayloadDto._id
     const theRecipe = this.recipeModel.find({ _id: editRecipePayloadDto._id })
     const { shareableId } = theRecipe
-    if (theRecipe.authorId !== user._id) {
+    const isFork = theRecipe.authorId !== `${user._id}`
+    if (isFork) {
       const { name, tags, attributes, config, permissions } = editRecipePayloadDto
       return await this.createRecipe(user, new RecipePayloadDto(name, tags, attributes, config, permissions, shareableId))
     }
@@ -52,8 +53,8 @@ export class RecipeService {
   async deleteRecipe(user: Account, idOfRecipeToDelete: string): Promise<Recipe> {
 
     const theRecipe = await this.recipeModel.findOne({ _id: idOfRecipeToDelete})
-
-    if (theRecipe.authorId !== user._id) {
+    const isDeleteByForker = theRecipe.authorId !== `${user._id}`
+    if (isDeleteByForker) {
       this.accountService.setImported(user._id, theRecipe.shareableId, false)
       return theRecipe
     }
