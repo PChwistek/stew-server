@@ -21,7 +21,7 @@ const theRecipe = {
         index: 0,
       }],
     }],
-    permissions: [],
+    linkPermissions: ['any'],
 }
 
 describe('Recipe Controller e2e', () => {
@@ -217,7 +217,7 @@ describe('Recipe Controller e2e', () => {
     return request(app.getHttpServer())
       .get(`/recipe/share/${shareId}`)
       .expect(400)
-})
+  })
 
   afterAll(async () => {
     await app.close()

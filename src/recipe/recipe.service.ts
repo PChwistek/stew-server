@@ -2,7 +2,6 @@ import { Model } from 'mongoose'
 import { InjectModel } from '@nestjs/mongoose'
 import { Injectable, BadRequestException } from '@nestjs/common'
 import { Recipe, RecipeHistory } from './recipe.interface'
-
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { Account } from '../account/account.interface'
 import { RecipeDto } from './recipe.dto'
@@ -11,6 +10,7 @@ import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
 import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
 import { RecipeByLinkDto } from './Payloads/recipe-by-link.payload.dto'
 import { RecipeHistoryDto } from './recipe-history.dto'
+import { RecipePermissionsPayload } from './Payloads/recipe-permissions-payload.dto'
 
 @Injectable()
 export class RecipeService {
@@ -35,8 +35,8 @@ export class RecipeService {
     const { shareableId } = theRecipe
     const isFork = theRecipe.authorId !== `${user._id}`
     if (isFork) {
-      const { name, tags, attributes, config, permissions } = editRecipePayloadDto
-      return await this.createRecipe(user, new RecipePayloadDto(name, tags, attributes, config, permissions, shareableId))
+      const { name, tags, attributes, config, linkPermissions } = editRecipePayloadDto
+      return await this.createRecipe(user, new RecipePayloadDto(name, tags, attributes, config, linkPermissions, shareableId))
     }
 
     const oldRecipe = await this.recipeModel.findOneAndUpdate({ _id }, {
@@ -80,6 +80,22 @@ export class RecipeService {
     } else {
       throw new BadRequestException()
     }
+  }
+
+  async editRecipePermissions(user: Account, editRecipePermissions: RecipePermissionsPayload): Promise<any> {
+    const { _id } = editRecipePermissions
+    const theRecipe = await this.recipeModel.findOne({ _id })
+    if (String(user._id) === theRecipe.authorId) {
+      return await this.recipeModel.findOneAndUpdate({ _id }, {
+        linkPermissions: editRecipePermissions.linkPermissions,
+        repos: editRecipePermissions.repos,
+        $inc: { __v: 1 },
+      }, { new: true })
+      // add to repo
+    } else {
+      throw new BadRequestException('Recipe not created by this user')
+    }
+
   }
 
   async getRecipeByShareId(id: string) {

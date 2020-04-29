@@ -8,8 +8,8 @@ export class EditRecipePayloadDto extends RecipePayloadDto {
 
   forkedFromId: string
 
-  constructor(id, name, tags, attributes, config, permissions, forkedFromId) {
-    super(name, tags, attributes, config, permissions, forkedFromId)
+  constructor(id, name, tags, attributes, config, linkPermissions, forkedFromId) {
+    super(name, tags, attributes, config, linkPermissions, forkedFromId)
     this._id = id
   }
 

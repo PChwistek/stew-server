@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, BadRequestException } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
@@ -9,7 +9,7 @@ import { SyncRecipePayloadDto } from './Payloads/sync-recipe-payload.dto'
 import { RecipeByLinkDto } from './Payloads/recipe-by-link.payload.dto'
 import { Recipe } from './recipe.interface'
 import { AddRecipeFavoriteDto } from './Payloads/add-recipe-favorite-payload.dto'
-import { request } from 'http'
+import { RecipePermissionsPayload } from './Payloads/recipe-permissions-payload.dto'
 
 @Controller('/recipe')
 export class RecipeController {
@@ -58,11 +58,23 @@ export class RecipeController {
     // check if already imported or is owned by
     const { user } = req
     const recipe = await this.recipeService.getRecipeByShareId(params.id)
-    if (recipe.length < 1) {
-      throw new BadRequestException()
+    console.log('recipe', recipe)
+    if (!recipe || recipe.length < 1) {
+      return new NotFoundException()
     }
 
-    const alreadyInLibrary = recipe[0].authorId === `${user._id}` || user.importedRecipes.findIndex(shareId => params.id === shareId) > -1
+    const isAuthor = recipe[0].authorId === `${user._id}`
+
+    const allowed =
+      recipe[0].linkPermissions.findIndex(item => item === 'any') > -1
+      || isAuthor
+      // add org
+
+    if (!allowed) {
+      return new ForbiddenException('You don\t have access to this recipe.')
+    }
+
+    const alreadyInLibrary = isAuthor || user.importedRecipes.findIndex(shareId => params.id === shareId) > -1
     return {
       recipe,
       alreadyInLibrary,
@@ -83,4 +95,10 @@ export class RecipeController {
     return await this.recipeService.deleteRecipe(user, deleteRecipePayloadDto._id)
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('/permissions')
+  async editRecipePermissions(@Request() req, @Body() recipePermissionsDto: RecipePermissionsPayload) {
+    const { user } = req
+    return await this.recipeService.editRecipePermissions(user, recipePermissionsDto)
+  }
 }

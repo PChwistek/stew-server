@@ -12,7 +12,9 @@ export const RecipeSchema = new mongoose.Schema({
   dateCreated: Date,
   dateModified: Date,
   shareableId: { type: String, default: uuidv4() },
-  permissions: Array,
+  linkPermissions: Array,
+  repos: Array,
+  global: Boolean,
 })
 
 export const RecipeHistorySchema = new mongoose.Schema({
@@ -28,5 +30,7 @@ export const RecipeHistorySchema = new mongoose.Schema({
   dateModified: Date,
   _recipeV: Number,
   shareableId: String,
-  permissions: Array,
+  linkPermissions: Array,
+  repos: Array,
+  global: Boolean,
 })

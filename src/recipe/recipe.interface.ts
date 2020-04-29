@@ -12,8 +12,10 @@ export interface Recipe extends Document {
   readonly attributes: Array<string>
   readonly config: Array<WindowConfig>
   readonly shareableId: string,
-  readonly permissions: Array<string>,
-  readonly forkedFromId: Array<string>
+  readonly linkPermissions: Array<string>,
+  readonly forkedFromId: Array<string>,
+  readonly repos: Array<string>,
+  readonly global: boolean,
 }
 
 export interface RecipeHistory extends Document {
@@ -28,6 +30,8 @@ export interface RecipeHistory extends Document {
   readonly attributes: Array<string>
   readonly config: Array<WindowConfig>
   readonly shareableId: string,
-  readonly permissions: Array<string>,
-  readonly forkedFromId: Array<string>
+  readonly linkPermissions: Array<string>,
+  readonly forkedFromId: Array<string>,
+  readonly repos: Array<string>,
+  readonly global: boolean,
 }
