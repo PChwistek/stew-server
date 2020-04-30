@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { Recipe } from './recipe.interface'
 
-export class RecipeHistoryDto extends RecipePayloadDto {
+export class ArchiveRecipeDto extends RecipePayloadDto {
 
   @IsNotEmpty()
   readonly recipeId: string

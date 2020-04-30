@@ -34,3 +34,9 @@ export const RecipeHistorySchema = new mongoose.Schema({
   repos: Array,
   global: Boolean,
 })
+
+export const RecipeDiffSchema = new mongoose.Schema({
+  recipeId: String,
+  dateModified: Date,
+  diff: Object,
+})
