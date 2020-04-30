@@ -119,7 +119,6 @@ describe('Recipe Controller e2e', () => {
       if (!('attributes' in res.body[0])) throw new Error('missing titles key')
       if (!('config' in res.body[0])) throw new Error('missing titles key')
     }
-    console.log('shareId', shareId)
     const response = await request(app.getHttpServer())
       .get(`/recipe/share/${shareId}`)
     expect(hasKeys(response))

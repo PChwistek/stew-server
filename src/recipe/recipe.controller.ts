@@ -58,7 +58,6 @@ export class RecipeController {
     // check if already imported or is owned by
     const { user } = req
     const recipe = await this.recipeService.getRecipeByShareId(params.id)
-    console.log('recipe', recipe)
     if (!recipe || recipe.length < 1) {
       return new NotFoundException()
     }
