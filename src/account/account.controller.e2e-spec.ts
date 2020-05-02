@@ -6,6 +6,7 @@ import { AccountModule } from './account.module'
 import { INestApplication } from '@nestjs/common'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
+import { getJwt } from '../../test/getJwtOrCreate'
 
 describe('Account Controller e2e', () => {
   let app: INestApplication
@@ -32,14 +33,7 @@ describe('Account Controller e2e', () => {
     app = moduleRef.createNestApplication()
     await app.init()
 
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'end-to-end@gmail.com',
-        password: '123456',
-      })
-
-    jwt = response.body.access_token
+    jwt = await getJwt(app)
   })
   it(`add display name - /POST profile`, () => {
     return request(app.getHttpServer())

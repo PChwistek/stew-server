@@ -12,11 +12,17 @@ export class RecipePayloadDto {
   @IsNotEmpty()
   readonly config: Array<WindowConfig>
 
-  constructor(name, tags, attributes, config) {
+  readonly linkPermissions: Array<string>
+
+  readonly forkedFromId: string
+
+  constructor(name, tags, attributes, config, linkPermissions, forkedFromId) {
     this.name = name
     this.tags = tags
     this.attributes = attributes
     this.config = config
+    this.linkPermissions = linkPermissions || ['any']
+    this.forkedFromId = forkedFromId || ''
   }
 
 }

@@ -9,4 +9,5 @@ export interface Account extends Document {
   readonly dateCreated: Date
   lastUpdated: Date
   favoriteRecipes: Array<string>
+  importedRecipes: Array<string>
 }

@@ -8,4 +8,5 @@ export const AccountSchema = new mongoose.Schema({
   karma: Number,
   dateCreated: Date,
   favoriteRecipes: Array,
+  importedRecipes: Array,
 })

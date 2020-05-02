@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { INestApplication } from '@nestjs/common'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
+import { getJwt } from '../../test/getJwtOrCreate'
 
 const theRecipe = {
     name: 'e2etest_recipe',
@@ -20,12 +21,14 @@ const theRecipe = {
         index: 0,
       }],
     }],
+    linkPermissions: ['any'],
 }
 
 describe('Recipe Controller e2e', () => {
   let app: INestApplication
   let jwt = ''
   let recipeId = ''
+  let shareId = ''
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -48,14 +51,7 @@ describe('Recipe Controller e2e', () => {
     app = moduleRef.createNestApplication()
     await app.init()
 
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'end-to-end@gmail.com',
-        password: '123456',
-      })
-
-    jwt = response.body.access_token
+    jwt = await getJwt(app)
   })
 
   it(`can create - /recipe/create POST`, async () => {
@@ -82,6 +78,7 @@ describe('Recipe Controller e2e', () => {
 
     expect(hasKeys(response))
     recipeId = response.body._id
+    shareId = response.body.shareableId
   })
 
   it(`can edit - /recipe/edit PATCH`, () => {
@@ -108,6 +105,33 @@ describe('Recipe Controller e2e', () => {
       })
       .expect(hasKeys)
   })
+
+  // it('can edit a link-shared recipe permissions - ', async () => {
+  //     const response = await request(app.getHttpServer())
+  //     .patch(`/recipe/permissions/)
+  //     .expect(401)
+  // })
+
+  it('can fetch a link-shared recipe - recipe/share/:id', async () => {
+    function hasKeys(res) {
+      if (!('_id' in res.body[0])) throw new Error('missing _id key')
+      if (!('__v' in res.body[0])) throw new Error('missing __v key')
+      if (!('author' in res.body[0])) throw new Error('missing author key')
+      if (!('authorId' in res.body[0])) throw new Error('missing authorId key')
+      if (!('dateCreated' in res.body[0])) throw new Error('missing dateCreated key')
+      if (!('dateModified' in res.body[0])) throw new Error('missing dateModified key')
+      if (!('name' in res.body[0])) throw new Error('missing name key')
+      // if (!('titles' in res.body)) throw new Error('missing titles key')
+      if (!('attributes' in res.body[0])) throw new Error('missing titles key')
+      if (!('config' in res.body[0])) throw new Error('missing titles key')
+    }
+    const response = await request(app.getHttpServer())
+      .get(`/recipe/share/${shareId}`)
+      .expect(401)
+    console.log('response', response)
+    // expect(hasKeys(response))
+})
+
   it(`can get all created recipes by author - /recipe/byAuthor GET`, async () => {
 
     const response = await request(app.getHttpServer())
@@ -182,6 +206,12 @@ describe('Recipe Controller e2e', () => {
           lastUpdated: new Date(),
         })
         .expect(hasRecipeId)
+  })
+
+  it('does not return a deleted recipe - recipe/share/:id', async () => {
+    return request(app.getHttpServer())
+      .get(`/recipe/share/${shareId}`)
+      .expect(404)
   })
 
   afterAll(async () => {

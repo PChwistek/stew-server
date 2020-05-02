@@ -5,6 +5,8 @@ export class RecipeDto extends RecipePayloadDto {
   readonly authorId: string
   readonly dateCreated: Date
   readonly dateModified: Date
+  readonly global: boolean
+  readonly repos: Array<string>
 
   constructor(author: string, authorId: string, recipePayloadDto: RecipePayloadDto) {
     super(
@@ -12,11 +14,15 @@ export class RecipeDto extends RecipePayloadDto {
       recipePayloadDto.tags,
       recipePayloadDto.attributes,
       recipePayloadDto.config,
+      recipePayloadDto.linkPermissions,
+      recipePayloadDto.forkedFromId,
     )
     this.author = author
     this.authorId = authorId
     this.dateCreated = new Date()
     this.dateModified = new Date()
+    this.global = false
+    this.repos = []
   }
 
 }

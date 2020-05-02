@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { Recipe } from './recipe.interface'
 
-export class RecipeHistoryDto extends RecipePayloadDto {
+export class ArchiveRecipeDto extends RecipePayloadDto {
 
   @IsNotEmpty()
   readonly recipeId: string
@@ -17,7 +17,7 @@ export class RecipeHistoryDto extends RecipePayloadDto {
   readonly dateModified: Date
 
   constructor(oldRecipe: Recipe) {
-    super(oldRecipe.name, oldRecipe.tags, oldRecipe.attributes, oldRecipe.config)
+    super(oldRecipe.name, oldRecipe.tags, oldRecipe.attributes, oldRecipe.config, oldRecipe.linkPermissions, oldRecipe.forkedFromId)
     this.dateModified = new Date()
     this.dateCreated = oldRecipe.dateCreated
     this.recipeId = oldRecipe._id

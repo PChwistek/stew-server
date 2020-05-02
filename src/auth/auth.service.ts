@@ -40,6 +40,7 @@ export class AuthService {
     const payload = { email: account.email, sub: 'the_secret_sauce_09013?//1' }
     const user = await this.accountService.findOneByEmail(account.email)
     return {
+      userId: user._id,
       username: user.username,
       lastUpdated: user.lastUpdated,
       access_token: this.jwtService.sign(payload),
