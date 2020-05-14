@@ -209,9 +209,15 @@ describe('Recipe Controller e2e', () => {
   })
 
   it('does not return a deleted recipe - recipe/share/:id', async () => {
+
+    function isEmpty(res) {
+      expect(res.body === [])
+    }
+
     return request(app.getHttpServer())
       .get(`/recipe/share/${shareId}`)
-      .expect(404)
+      .set('Authorization', `Bearer ${jwt}`)
+      .expect(isEmpty)
   })
 
   afterAll(async () => {
