@@ -1,0 +1,25 @@
+import { IsNotEmpty } from 'class-validator'
+import { OrgPayloadDto } from './org-payload.dto'
+
+export class OrgDto extends OrgPayloadDto {
+
+  readonly repos: Array<string>
+
+  @IsNotEmpty()
+  readonly members: Array<string>
+
+  @IsNotEmpty()
+  readonly admins: Array<string>
+
+  readonly lastPaid: Date
+
+  constructor(name, members, admins, repos, numberOfSeats, paidSince, lastPaid, plan) {
+    super(name, numberOfSeats, paidSince, plan)
+    this.repos = repos
+    this.admins = admins
+    this.members = members
+    this.lastPaid = lastPaid
+
+  }
+
+}
