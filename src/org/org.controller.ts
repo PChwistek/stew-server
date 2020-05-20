@@ -3,7 +3,8 @@ import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { Org } from './org.interface'
 import { OrgService } from './org.service'
-import { OrgPayloadDto } from './org-payload.dto'
+import { OrgPayloadDto } from './payloads/org-payload.dto'
+import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 
 @Controller('/org')
 export class OrgController {
@@ -11,10 +12,17 @@ export class OrgController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/create')
-  async createRecipe(@Request() req, @Body() orgPayloadDto: OrgPayloadDto): Promise<Org> {
+  async createOrg(@Request() req, @Body() orgPayloadDto: OrgPayloadDto): Promise<Org> {
     const { user } = req
     const theOrg = await this.orgService.create(user, orgPayloadDto)
     return theOrg
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/purchase')
+  async purchasePlan(@Request() req, @Body() purchasePayload: PurchasePlanPayload): Promise<string> {
+    const { user } = req
+    return await this.orgService.purchasePlan(user, purchasePayload)
   }
 
 }

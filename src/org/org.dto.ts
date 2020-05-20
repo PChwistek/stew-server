@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator'
-import { OrgPayloadDto } from './org-payload.dto'
+import { OrgPayloadDto } from './payloads/org-payload.dto'
 
 export class OrgDto extends OrgPayloadDto {
 
