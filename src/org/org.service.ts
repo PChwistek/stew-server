@@ -54,39 +54,30 @@ export class OrgService {
 
   async purchasePlan(user: Account, purchasePayload: PurchasePlanPayload) {
 
+    const baseUrl = this.configService.get('WEBSITE_URL')
+    let line_items = []
     if (purchasePayload.plan === 'starter') {
 
-      const line_items = purchasePayload.numberOfSeats > 5
+      line_items = purchasePayload.numberOfSeats > 5
         ? [{ price: `${this.configService.get('STARTER_BASE')}`, quantity: 1 },
           { price: `${this.configService.get('STARTER_EXTRA')}`, quantity: purchasePayload.numberOfSeats - 5 }]
         : [{ price: `${this.configService.get('STARTER_BASE')}`, quantity: 1 }]
+    } else if (purchasePayload.plan === 'growth') {
+      line_items = purchasePayload.numberOfSeats > 10
+      ? [{ price: `${this.configService.get('GROWTH_BASE')}`, quantity: 1 },
+        { price: `${this.configService.get('GROWTH_EXTRA')}`, quantity: purchasePayload.numberOfSeats - 10 }]
+      : [{ price: `${this.configService.get('GROWTH_BASE')}`, quantity: 1 }]
 
-      const baseUrl = this.configService.get('WEBSITE_URL')
+    }
 
+    if (line_items.length > 0) {
       const session = await this.stripeClient.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items,
         mode: 'subscription',
         success_url: `${baseUrl}/teams`,
-        cancel_url: `${baseUrl}/404`,
+        cancel_url: `${baseUrl}/teams`,
       })
-
-      return session.id
-
-    } else if (purchasePayload.plan === 'growth') {
-      const line_items = purchasePayload.numberOfSeats > 10
-      ? [{ price: `${this.configService.get('GROWTH_BASE')}`, quantity: 1 },
-        { price: `${this.configService.get('GROWTH_EXTRA')}`, quantity: purchasePayload.numberOfSeats - 10 }]
-      : [{ price: `${this.configService.get('GROWTH_BASE')}`, quantity: 1 }]
-
-      const session = await this.stripeClient.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items,
-        mode: 'subscription',
-        success_url: 'https://staging.getstew.com/teams',
-        cancel_url: 'https://staging.getstew.com/404',
-      })
-
       return session.id
     }
   }
