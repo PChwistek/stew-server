@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Headers, Req } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { Org } from './org.interface'
 import { OrgService } from './org.service'
@@ -25,4 +25,9 @@ export class OrgController {
     return await this.orgService.purchasePlan(user, purchasePayload)
   }
 
+  @Post('/purchase-completed')
+  async create(@Headers('stripe-signature') signature, @Req() request: any) {
+    return this.orgService.completePurchase(request.rawBody, signature)
+
+  }
 }
