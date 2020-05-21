@@ -9,6 +9,7 @@ import { OrgDto } from './org.dto'
 import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 import { ConfigService } from '../config/config.service'
 import { Account } from '../account/account.interface'
+import { AccountService } from '../account/account.service'
 // const growthAdditionalSeats = 'plan_HJbNfiDHlGp5Ur'
 // const starterAdditionalSeats = 'plan_HJbMwdRClc4TAo'
 
@@ -20,14 +21,16 @@ export class OrgService {
   constructor(
   @InjectModel('Org') private readonly orgModel: Model<Org>,
   @InjectStripe() private readonly stripeClient: Stripe,
-  private readonly configService: ConfigService) {}
+  private readonly configService: ConfigService,
+  private readonly accountService: AccountService) {}
 
-  async create(user: Account, orgPayloadDto: OrgPayloadDto): Promise<Org> {
+  async create(user: Account, orgPayloadDto: OrgPayloadDto, stripeCustomerId: string): Promise<Org> {
     const { _id } = user
     const fullOrg = new OrgDto(
       orgPayloadDto.name, [_id], [_id], [],
       orgPayloadDto.numberOfSeats, new Date(), new Date(),
       orgPayloadDto.plan,
+      stripeCustomerId,
     )
     const createdOrg = new this.orgModel(fullOrg)
     await createdOrg.save()
@@ -76,7 +79,7 @@ export class OrgService {
         payment_method_types: ['card'],
         line_items,
         mode: 'subscription',
-        success_url: `${baseUrl}/teams`,
+        success_url: `${baseUrl}/purchase-success`,
         cancel_url: `${baseUrl}/teams`,
         customer_email: email,
       })
@@ -88,7 +91,7 @@ export class OrgService {
     let event
 
     try {
-      event =  this.stripeClient.webhooks.constructEvent(body, sig, this.configService.get('STRIPE_WEBHOOK'))
+      event = this.stripeClient.webhooks.constructEvent(body, sig, this.configService.get('STRIPE_WEBHOOK'))
     } catch (err) {
       console.log('err', err)
       throw new BadRequestException(`Webhook Error: ${err.message}`)
@@ -96,13 +99,65 @@ export class OrgService {
     // Handle the checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
-      console.log('session', session)
-      console.log('payer', session.customer_email)
-      // Fulfill the purchase...
+      const theAccount = await this.accountService.findOneByEmail(session.customer_email)
+      const thePurchase = await this.stripeClient.subscriptions.retrieve(session.subscription)
+      console.log('the purchase', thePurchase)
+
+      const thePlans = thePurchase.items.data
+      let numSeats = 0
+      let plan = ''
+      for (let index = 0; index < thePlans.length; index++) {
+        const element = thePlans[index]
+        if (element.plan.nickname === 'Growth Plan - Base') {
+          plan = 'growth'
+          numSeats += 10
+        } else if (element.plan.nickname === 'Starter Plan - Base') {
+          plan = 'starter'
+          numSeats += 5
+        } else if (element.plan.nickname === 'Stew Additional Seats' || 'Stew Growth - Additional Seats') {
+          numSeats += element.quantity
+        }
+      }
+
+      const newOrg = await this.create(theAccount, new OrgPayloadDto('', numSeats, new Date(), plan), thePurchase.customer.toString())
+      this.accountService.setOrgs(theAccount._id, newOrg._id, true)
 
     }
     // Return a response to acknowledge receipt of the event
     return true
+  }
+
+  async getDashboard(user: Account) {
+    console.log('user', user)
+    if (user.orgs && user.orgs.length > 0) {
+      const theOrg = await this.orgModel.findOne({ _id: user.orgs[0] })
+
+      if (theOrg) {
+        return {
+          hasOrg: true,
+          isAdmin: theOrg.admins.findIndex(adminId => adminId === user._id) > -1,
+          ...theOrg._doc,
+        }
+      }
+    }
+
+    return {
+      hasOrg: false,
+      isAdmin: false,
+    }
+  }
+
+  async generateSelfServeLink(repoId: string) {
+    const theOrg = await this.orgModel.findOne({ _id: repoId })
+    const baseUrl = this.configService.get('WEBSITE_URL')
+
+    const billingPortal = await this.stripeClient.billingPortal.sessions.create(
+      {
+        customer: theOrg.stripeCustomerId,
+        return_url:  `${baseUrl}/teams`,
+      }
+    )
+    return billingPortal
   }
 
 }

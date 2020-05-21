@@ -30,6 +30,15 @@ export class AuthController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('orgs')
+  getOrgs(@Request() req) {
+    const { orgs } = req.user
+    return {
+      orgs,
+    }
+  }
+
   @Post('/register')
   async createAccount(@Body() payloadAccountDto: AccountPayloadDto) {
     const exists = await this.authService.userExists(payloadAccountDto.email)

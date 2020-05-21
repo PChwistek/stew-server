@@ -9,4 +9,5 @@ export const OrgSchema = new mongoose.Schema({
   paidSince: Date,
   lastPaid: Date,
   plan: String,
+  stripeCustomerId: String,
 })

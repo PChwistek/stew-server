@@ -6,9 +6,10 @@ import { OrgSchema } from '../schemas/org.schema'
 import { StripeModule } from 'nestjs-stripe'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
+import { AccountModule } from '../account/account.module'
 
 @Module({
-  imports: [ConfigModule, MongooseModule.forFeature([{ name: 'Org', schema: OrgSchema }], 'stew'),
+  imports: [ConfigModule, AccountModule, MongooseModule.forFeature([{ name: 'Org', schema: OrgSchema }], 'stew'),
     StripeModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
