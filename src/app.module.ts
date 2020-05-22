@@ -9,6 +9,7 @@ import { RecipeModule } from './recipe/recipe.module'
 import { OrgModule } from './org/org.module'
 import { ConfigService } from './config/config.service'
 import { EmailGatewayModule } from './emailgateway/emailgateway.module'
+import { RecordKeeperModule } from './recordkeeper/recordkeeper.module'
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { EmailGatewayModule } from './emailgateway/emailgateway.module'
       connectionName: 'stew',
       inject: [ConfigService],
   }),
-  AuthModule, AccountModule, RecipeModule, OrgModule, EmailGatewayModule],
+  AuthModule, AccountModule, RecipeModule, OrgModule, EmailGatewayModule, RecordKeeperModule],
   controllers: [AppController],
   providers: [AppService],
 })

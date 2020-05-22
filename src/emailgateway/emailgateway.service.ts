@@ -34,7 +34,7 @@ export class EmailGatewayService {
           Html: {
             Charset: 'UTF-8',
             Data: `<p> Hello,\r\n we've received a request to change the password associated with ${sendTo}.</p>
-            <p>You can reset your password <a href=${url}>here.</a></p>
+            <p>You can reset your password <a href=${url}>here.</a> This link is valid for twenty minutes. </p>
             <p>If you did not request a new password, please let us know immediately by replying to this email.</p>`,
           },
         },

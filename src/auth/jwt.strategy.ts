@@ -18,8 +18,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const { email } = payload
+    const { email, sub } = payload
     const user = await this.accountService.findOneByEmail(email)
-    return user
+    const tokenPayload = {
+      account: user,
+      sub,
+    }
+    return tokenPayload
   }
 }

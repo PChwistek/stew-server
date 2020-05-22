@@ -11,8 +11,8 @@ export class OrgController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/purchase')
   async purchasePlan(@Request() req, @Body() purchasePayload: PurchasePlanPayload): Promise<string> {
-    const { user } = req
-    return await this.orgService.purchasePlan(user, purchasePayload)
+    const { account } = req.user
+    return await this.orgService.purchasePlan(account, purchasePayload)
   }
 
   @Post('/purchase-completed')
@@ -23,8 +23,8 @@ export class OrgController {
   @UseGuards(AuthGuard('jwt'))
   @Get('/dashboard')
   async getOrgDash(@Request() req): Promise<any> {
-    const { user } = req
-    return await this.orgService.getDashboard(user)
+    const { account } = req.user
+    return await this.orgService.getDashboard(account)
   }
 
   @UseGuards(AuthGuard('jwt'))

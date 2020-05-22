@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Get, BadRequestException, Headers } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { AuthService } from './auth.service'
 import { LoginAccountDto } from '../account/login-account.dto'
@@ -26,7 +26,8 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {
-    const { username } = req.user
+    const { username } = req.user.account
+    console.log('req', req)
     return {
       username,
     }
@@ -35,7 +36,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('orgs')
   getOrgs(@Request() req) {
-    const { orgs } = req.user
+    const { orgs } = req.user.account
     return {
       orgs,
     }
@@ -53,20 +54,20 @@ export class AuthController {
   }
 
   @Post('/reset-request')
-  async requestReset(@Body() resetPasswordPayload: ResetRequestPayload) {
+  async requestReset(@Headers() headers, @Request() request, @Body() resetPasswordPayload: ResetRequestPayload) {
     const exists = await this.authService.userExists(resetPasswordPayload.email)
     if (!exists) {
       throw new BadRequestException('No account with this email exists.')
     }
 
-    return this.authService.generateResetLink(resetPasswordPayload.email)
+    return this.authService.generateResetLink(resetPasswordPayload.email, request.ip, headers['user-agent'])
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/reset-password')
-  async resetPassword(@Request() req, @Body() resetPasswordPayload: ResetPasswordPayload) {
-    const { user } = req
-    return this.authService.resetPassword(user, resetPasswordPayload.password)
+  async resetPassword(@Headers() headers, @Request() req, @Body() resetPasswordPayload: ResetPasswordPayload) {
+    const { account, sub } = req.user
+    return this.authService.resetPassword(account, resetPasswordPayload.password, sub, req.ip, headers['user-agent'])
   }
 
 }

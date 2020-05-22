@@ -9,9 +9,10 @@ import { AuthController } from './auth.controller'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
 import { EmailGatewayModule } from '../emailgateway/emailgateway.module'
+import { RecordKeeperModule } from '../recordkeeper/recordkeeper.module'
 
 @Module({
-  imports: [AccountModule, PassportModule, ConfigModule, EmailGatewayModule,
+  imports: [AccountModule, PassportModule, ConfigModule, EmailGatewayModule, RecordKeeperModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
