@@ -57,7 +57,7 @@ export class AuthService {
     const baseUrl = this.configService.get('WEBSITE_URL')
     const token = this.jwtService.sign(payload, { expiresIn: '20m' } )
     const url = `${baseUrl}/new-password/${token}`
-    this.emailService.sendEmailRequest(email)
+    this.emailService.sendEmailRequest(email, url)
     return true
   }
 
@@ -65,6 +65,9 @@ export class AuthService {
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(newPassword, saltRounds)
     // send email
+    const baseUrl = this.configService.get('WEBSITE_URL')
+    const url = `${baseUrl}/password-reset`
+    this.emailService.sendEmailPasswordChangeConfirm(user.email, url)
     return await this.accountService.setNewPassword(user._id, passwordHash)
   }
 
