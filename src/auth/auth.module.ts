@@ -8,9 +8,10 @@ import { JwtStrategy } from './jwt.strategy'
 import { AuthController } from './auth.controller'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
+import { EmailGatewayModule } from '../emailgateway/emailgateway.module'
 
 @Module({
-  imports: [AccountModule, PassportModule, ConfigModule,
+  imports: [AccountModule, PassportModule, ConfigModule, EmailGatewayModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

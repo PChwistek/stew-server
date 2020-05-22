@@ -7,6 +7,7 @@ import { AccountPayloadDto } from '../account/account-payload.dto'
 import { LoginAccountDto } from '../account/login-account.dto'
 import { ConfigService } from '../config/config.service'
 import { Account } from '../account/account.interface'
+import { EmailGatewayService } from '../emailgateway/emailgateway.service'
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     private readonly accountService: AccountService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailGatewayService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -53,14 +55,16 @@ export class AuthService {
   async generateResetLink(email: string) {
     const payload = { email, sub: 'the_secret_sauce_09013?//1' }
     const baseUrl = this.configService.get('WEBSITE_URL')
-    const token = this.jwtService.sign(payload, { expiresIn: '20m'} )
+    const token = this.jwtService.sign(payload, { expiresIn: '20m' } )
     const url = `${baseUrl}/new-password/${token}`
+    this.emailService.sendEmailRequest(email)
     return true
   }
 
   async resetPassword(user: Account, newPassword: string) {
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(newPassword, saltRounds)
+    // send email
     return await this.accountService.setNewPassword(user._id, passwordHash)
   }
 
