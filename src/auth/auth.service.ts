@@ -5,12 +5,15 @@ import * as bcrypt from 'bcrypt'
 import { AccountService } from '../account/account.service'
 import { AccountPayloadDto } from '../account/account-payload.dto'
 import { LoginAccountDto } from '../account/login-account.dto'
+import { ConfigService } from '../config/config.service'
+import { Account } from '../account/account.interface'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly accountService: AccountService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -45,6 +48,20 @@ export class AuthService {
       lastUpdated: user.lastUpdated,
       access_token: this.jwtService.sign(payload),
     }
+  }
+
+  async generateResetLink(email: string) {
+    const payload = { email, sub: 'the_secret_sauce_09013?//1' }
+    const baseUrl = this.configService.get('WEBSITE_URL')
+    const token = this.jwtService.sign(payload, { expiresIn: '20m'} )
+    const url = `${baseUrl}/new-password/${token}`
+    return true
+  }
+
+  async resetPassword(user: Account, newPassword: string) {
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(newPassword, saltRounds)
+    return await this.accountService.setNewPassword(user._id, passwordHash)
   }
 
 }

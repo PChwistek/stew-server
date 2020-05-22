@@ -63,6 +63,11 @@ export class AccountService {
     return await this.accountModel.findOneAndUpdate({ _id: userId }, { importedRecipes }, { returnOriginal: false })
   }
 
+  async setNewPassword(_id: string, newPasswordHash: string) {
+    await this.accountModel.findOneAndUpdate({ _id }, { passwordHash: newPasswordHash }, { returnOriginal: false })
+    return true
+  }
+
   async findOneById(_id: string): Promise<Account> {
     return await this.accountModel.findOne({ _id }).exec()
   }
