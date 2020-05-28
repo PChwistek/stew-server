@@ -3,6 +3,7 @@ import { Controller, Request, Post, UseGuards, Body, Headers, Req, Get, Param } 
 import { AuthGuard } from '@nestjs/passport'
 import { OrgService } from './org.service'
 import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
+import { NewMembersPayloadDto } from './payloads/new-members-payload.dto'
 
 @Controller('/org')
 export class OrgController {
@@ -25,6 +26,12 @@ export class OrgController {
   async getOrgDash(@Request() req): Promise<any> {
     const { account } = req.user
     return await this.orgService.getDashboard(account)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/add-member')
+  async addMembers(@Body() newMembersPayload: NewMembersPayloadDto): Promise<any> {
+    return await this.orgService.addMembers(newMembersPayload.newMembers)
   }
 
   @UseGuards(AuthGuard('jwt'))

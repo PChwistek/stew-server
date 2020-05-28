@@ -10,11 +10,6 @@ import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 import { ConfigService } from '../config/config.service'
 import { Account } from '../account/account.interface'
 import { AccountService } from '../account/account.service'
-// const growthAdditionalSeats = 'plan_HJbNfiDHlGp5Ur'
-// const starterAdditionalSeats = 'plan_HJbMwdRClc4TAo'
-
-// const growthPlan = 'plan_HJbLBiVQWECbXk'
-// const starterPlan = 'plan_HJbLRoo3frzZHY'
 
 @Injectable()
 export class OrgService {
@@ -25,9 +20,9 @@ export class OrgService {
   private readonly accountService: AccountService) {}
 
   async create(user: Account, orgPayloadDto: OrgPayloadDto, stripeCustomerId: string): Promise<Org> {
-    const { _id } = user
+    const { _id, email } = user
     const fullOrg = new OrgDto(
-      orgPayloadDto.name, [_id], [_id], [],
+      orgPayloadDto.name, [{ email, status: 'accepted' }], [_id], [],
       orgPayloadDto.numberOfSeats, new Date(), new Date(),
       orgPayloadDto.plan,
       stripeCustomerId,
@@ -43,8 +38,9 @@ export class OrgService {
 
   }
 
-  async addMember() {
-
+  async addMembers(members: Array<string>) {
+    // add member
+    // send emails
   }
 
   async editRepo() {
@@ -128,14 +124,12 @@ export class OrgService {
   }
 
   async getDashboard(user: Account) {
-    console.log('user', user)
     if (user.orgs && user.orgs.length > 0) {
       const theOrg = await this.orgModel.findOne({ _id: user.orgs[0] })
-
       if (theOrg) {
         return {
           hasOrg: true,
-          isAdmin: theOrg.admins.findIndex(adminId => adminId === user._id) > -1,
+          isAdmin: theOrg.admins.includes(`${user._id}`),
           ...theOrg._doc,
         }
       }
