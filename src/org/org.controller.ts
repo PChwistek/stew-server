@@ -30,8 +30,17 @@ export class OrgController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/add-member')
-  async addMembers(@Body() newMembersPayload: NewMembersPayloadDto): Promise<any> {
-    return await this.orgService.addMembers(newMembersPayload.newMembers)
+  async addMembers(@Request() req, @Body() newMembersPayload: NewMembersPayloadDto): Promise<any> {
+    const { account } = req.user
+    const { newMembers, orgId } = newMembersPayload
+    return await this.orgService.addMembers(account, orgId, newMembers)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/accept-invite')
+  async acceptMemberInvite(@Request() req): Promise<any> {
+    const { sub } = req.user
+    return await this.orgService.acceptOrgInvite(sub)
   }
 
   @UseGuards(AuthGuard('jwt'))

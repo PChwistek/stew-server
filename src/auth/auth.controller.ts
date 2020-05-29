@@ -27,7 +27,6 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req) {
     const { username } = req.user.account
-    console.log('req', req)
     return {
       username,
     }

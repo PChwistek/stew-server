@@ -1,6 +1,7 @@
 import { Model } from 'mongoose'
 import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { JwtService } from '@nestjs/jwt'
 import { InjectStripe } from 'nestjs-stripe'
 import Stripe from 'stripe'
 import { Org } from './org.interface'
@@ -10,14 +11,20 @@ import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 import { ConfigService } from '../config/config.service'
 import { Account } from '../account/account.interface'
 import { AccountService } from '../account/account.service'
+import { EmailGatewayService } from '../emailgateway/emailgateway.service'
+import { RecordKeeperService } from '../recordkeeper/recordkeeper.service'
 
 @Injectable()
 export class OrgService {
   constructor(
-  @InjectModel('Org') private readonly orgModel: Model<Org>,
-  @InjectStripe() private readonly stripeClient: Stripe,
-  private readonly configService: ConfigService,
-  private readonly accountService: AccountService) {}
+    @InjectModel('Org') private readonly orgModel: Model<Org>,
+    @InjectStripe() private readonly stripeClient: Stripe,
+    private readonly configService: ConfigService,
+    private readonly accountService: AccountService,
+    private readonly emailService: EmailGatewayService,
+    private readonly jwtService: JwtService,
+    private readonly recordService: RecordKeeperService,
+  ) {}
 
   async create(user: Account, orgPayloadDto: OrgPayloadDto, stripeCustomerId: string): Promise<Org> {
     const { _id, email } = user
@@ -38,9 +45,74 @@ export class OrgService {
 
   }
 
-  async addMembers(members: Array<string>) {
-    // add member
-    // send emails
+  async addMembers(invitedBy: Account, orgId: string, members: Array<string>) {
+
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+    if (theOrg.members + members.length > theOrg.numberOfSeats) {
+      throw new BadRequestException('More members than seats')
+    }
+    members = members.map(member => member.toLowerCase())
+      .filter(member => theOrg.members.findIndex(existing => existing.email === member) === -1)
+
+    const newMembers = []
+
+    for (const member of members) {
+      const theAccount = await this.accountService.findOneByEmail(member)
+      if (!theAccount || theAccount.orgs.length === 0) {
+        newMembers.push({
+          email: member,
+          status: 'invited',
+          id: theAccount ? theAccount._id : null,
+        })
+      }
+    }
+
+    let newMembersToSave = theOrg.members
+    newMembersToSave = newMembersToSave.concat(newMembers)
+    await this.orgModel.findOneAndUpdate({ _id: orgId },
+      { members: newMembersToSave,  $inc: { __v: 1 }},
+      { returnOriginal: false})
+
+    for (const member of newMembers) {
+
+      const inviteRecord = await this.recordService.createOrgInviteRecord(theOrg._id, invitedBy._id, member.id, member.email)
+      const payload = { email: invitedBy.email, sub: inviteRecord._id }
+      const baseUrl = this.configService.get('WEBSITE_URL')
+      const token = this.jwtService.sign(payload, { expiresIn: '3d' } )
+      const url = `${baseUrl}/accept-invite/${token}`
+
+      setTimeout(() => {
+        this.emailService.sendOrganizationInvite(invitedBy.email, member.email, url)
+      }, 1000)
+    }
+    return true
+  }
+
+  async acceptOrgInvite(recordKeeperId) {
+
+    const theRecord = await this.recordService.findOrgInviteRecord(recordKeeperId)
+    const { orgId, memberEmail, memberId, completed } = theRecord
+
+    if (completed) {
+      return { status: 'invalid' }
+    }
+
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+    const updatedMembers = theOrg.members
+
+    const theIndex = updatedMembers.findIndex(member => member.email === memberEmail)
+    updatedMembers[theIndex] = { email: memberEmail, status: 'accepted' }
+    await this.orgModel.findOneAndUpdate({ _id: orgId },
+      { members: updatedMembers },
+      { returnOriginal: false})
+
+    await this.recordService.completeOrgInviteRecord(recordKeeperId)
+
+    if (memberId) {
+      await this.accountService.setOrgs(memberId, orgId, true)
+    }
+
+    return { status: 'accepted' }
   }
 
   async editRepo() {

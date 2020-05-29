@@ -7,9 +7,13 @@ import { StripeModule } from 'nestjs-stripe'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
 import { AccountModule } from '../account/account.module'
+import { EmailGatewayModule } from '../emailgateway/emailgateway.module'
+import { RecordKeeperModule } from '../recordkeeper/recordkeeper.module'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
-  imports: [ConfigModule, AccountModule, MongooseModule.forFeature([{ name: 'Org', schema: OrgSchema }], 'stew'),
+  imports: [ConfigModule, AccountModule, EmailGatewayModule, RecordKeeperModule,
+    MongooseModule.forFeature([{ name: 'Org', schema: OrgSchema }], 'stew'),
     StripeModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -17,6 +21,14 @@ import { AccountModule } from '../account/account.module'
         apiKey: configService.get('STRIPE'),
         apiVersion: null,
       }),
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: '7d' },
+      }),
+      inject: [ConfigService],
     }),
   ],
   providers: [OrgService],

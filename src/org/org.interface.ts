@@ -7,12 +7,12 @@ export interface Member {
 
 export interface Org extends Document {
   readonly _id: string,
-  readonly members: Array<Member>,
-  readonly repos: Array<string>,
-  readonly admins: Array<string>,
-  readonly numberOfSeats: number,
+  members: Array<Member>,
+  repos: Array<string>,
+  admins: Array<string>,
+  numberOfSeats: number,
   readonly paidSince: Date,
-  readonly lastPaid: Date,
-  readonly plan: string,
+  lastPaid: Date,
+  plan: string,
   readonly stripeCustomerId: string,
 }
