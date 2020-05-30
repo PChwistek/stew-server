@@ -24,7 +24,8 @@ import { RecordKeeperModule } from './recordkeeper/recordkeeper.module'
       connectionName: 'stew',
       inject: [ConfigService],
   }),
-  AuthModule, AccountModule, RecipeModule, OrgModule, EmailGatewayModule, RecordKeeperModule],
+  AuthModule, AccountModule, RecipeModule, OrgModule,
+  EmailGatewayModule, RecordKeeperModule],
   controllers: [AppController],
   providers: [AppService],
 })

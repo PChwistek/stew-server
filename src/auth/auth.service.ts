@@ -6,7 +6,6 @@ import { AccountService } from '../account/account.service'
 import { AccountPayloadDto } from '../account/account-payload.dto'
 import { LoginAccountDto } from '../account/login-account.dto'
 import { ConfigService } from '../config/config.service'
-import { Account } from '../account/account.interface'
 import { EmailGatewayService } from '../emailgateway/emailgateway.service'
 import { RecordKeeperService } from '../recordkeeper/recordkeeper.service'
 
@@ -56,24 +55,25 @@ export class AuthService {
 
   async generateResetLink(email: string, ip: string, device: string) {
     const record = await this.recordService.createPasswordChangeRecord(email, ip, device)
-    const payload = { email, sub: record._id }
+    const payload = { refId: record._id }
     const baseUrl = this.configService.get('WEBSITE_URL')
-    const token = this.jwtService.sign(payload, { expiresIn: '20m' } )
+    const token = this.jwtService.sign(payload, { expiresIn: '20m'})
     const url = `${baseUrl}/new-password/${token}`
     this.emailService.sendEmailRequest(email, url)
     return true
   }
 
-  async resetPassword(user: Account, newPassword: string, theRecordId: string, ip: string, device: string) {
+  async resetPassword(newPassword: string, theRecordId: string, ip: string, device: string) {
     const theRecord = await this.recordService.getPasswordChangeRecordById(theRecordId)
+    const theAccount = await this.accountService.findOneByEmail(theRecord.email)
     if (!theRecord.completed) {
       const saltRounds = 10
       const passwordHash = await bcrypt.hash(newPassword, saltRounds)
       // send email
       const baseUrl = this.configService.get('WEBSITE_URL')
       const url = `${baseUrl}/password-reset`
-      this.emailService.sendEmailPasswordChangeConfirm(user.email, url)
-      const theResponse = await this.accountService.setNewPassword(user._id, passwordHash)
+      this.emailService.sendEmailPasswordChangeConfirm(theAccount.email, url)
+      const theResponse = await this.accountService.setNewPassword(theAccount._id, passwordHash)
       await this.recordService.completePasswordChangeRecord(theRecordId, ip, device)
       return theResponse
     } else {

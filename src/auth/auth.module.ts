@@ -5,6 +5,7 @@ import { AccountModule } from '../account/account.module'
 import { PassportModule } from '@nestjs/passport'
 import { LocalStrategy } from './local.strategy'
 import { JwtStrategy } from './jwt.strategy'
+import { JwtLinkStrategy } from './jwtlink.strategy'
 import { AuthController } from './auth.controller'
 import { ConfigService } from '../config/config.service'
 import { ConfigModule } from '../config/config.module'
@@ -21,8 +22,8 @@ import { RecordKeeperModule } from '../recordkeeper/recordkeeper.module'
       }),
       inject: [ConfigService],
     })],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtLinkStrategy],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, JwtStrategy, JwtLinkStrategy],
 })
 export class AuthModule {}

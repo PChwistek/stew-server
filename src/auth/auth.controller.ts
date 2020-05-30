@@ -23,6 +23,12 @@ export class AuthController {
     return true
   }
 
+  @UseGuards(AuthGuard('jwt-link'))
+  @Get('/validate-link')
+  async checkLinkToken() {
+    return true
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {
@@ -62,11 +68,11 @@ export class AuthController {
     return this.authService.generateResetLink(resetPasswordPayload.email, request.ip, headers['user-agent'])
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt-link'))
   @Post('/reset-password')
   async resetPassword(@Headers() headers, @Request() req, @Body() resetPasswordPayload: ResetPasswordPayload) {
-    const { account, sub } = req.user
-    return this.authService.resetPassword(account, resetPasswordPayload.password, sub, req.ip, headers['user-agent'])
+    const { refId } = req.user
+    return this.authService.resetPassword(resetPasswordPayload.password, refId, req.ip, headers['user-agent'])
   }
 
 }

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { JwtModule } from '@nestjs/jwt'
 import { MongooseModule } from '@nestjs/mongoose'
 import { OrgService } from './org.service'
 import { OrgController } from './org.controller'
@@ -9,7 +10,6 @@ import { ConfigModule } from '../config/config.module'
 import { AccountModule } from '../account/account.module'
 import { EmailGatewayModule } from '../emailgateway/emailgateway.module'
 import { RecordKeeperModule } from '../recordkeeper/recordkeeper.module'
-import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [ConfigModule, AccountModule, EmailGatewayModule, RecordKeeperModule,

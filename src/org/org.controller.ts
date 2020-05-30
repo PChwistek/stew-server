@@ -36,11 +36,11 @@ export class OrgController {
     return await this.orgService.addMembers(account, orgId, newMembers)
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt-link'))
   @Post('/accept-invite')
   async acceptMemberInvite(@Request() req): Promise<any> {
-    const { sub } = req.user
-    return await this.orgService.acceptOrgInvite(sub)
+    const { refId } = req.user
+    return await this.orgService.acceptOrgInvite(refId)
   }
 
   @UseGuards(AuthGuard('jwt'))

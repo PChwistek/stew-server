@@ -76,9 +76,9 @@ export class OrgService {
     for (const member of newMembers) {
 
       const inviteRecord = await this.recordService.createOrgInviteRecord(theOrg._id, invitedBy._id, member.id, member.email)
-      const payload = { email: invitedBy.email, sub: inviteRecord._id }
+      const payload = { refId: inviteRecord._id }
       const baseUrl = this.configService.get('WEBSITE_URL')
-      const token = this.jwtService.sign(payload, { expiresIn: '3d' } )
+      const token = this.jwtService.sign(payload, { expiresIn: '7d'} )
       const url = `${baseUrl}/accept-invite/${token}`
 
       setTimeout(() => {
