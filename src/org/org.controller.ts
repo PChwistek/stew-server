@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport'
 import { OrgService } from './org.service'
 import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 import { NewMembersPayloadDto } from './payloads/new-members-payload.dto'
+import { ResendEmailPayload } from './payloads/resend-email-payload.dto'
 
 @Controller('/org')
 export class OrgController {
@@ -34,6 +35,14 @@ export class OrgController {
     const { account } = req.user
     const { newMembers, orgId } = newMembersPayload
     return await this.orgService.addMembers(account, orgId, newMembers)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/resend-group-invite')
+  async resendInvites(@Request() req, @Body() resendPayload: ResendEmailPayload): Promise<any> {
+    const { account } = req.user
+    const { email, orgId } = resendPayload
+    return await this.orgService.resendInvite(account, orgId, email)
   }
 
   @UseGuards(AuthGuard('jwt-link'))

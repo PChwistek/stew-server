@@ -115,6 +115,20 @@ export class OrgService {
     return { status: 'accepted' }
   }
 
+  async resendInvite(invitedBy: Account, orgId: string, memberEmail: string) {
+
+    const theAccount = await this.accountService.findOneByEmail(memberEmail)
+
+    const inviteRecord = await this.recordService.createOrgInviteRecord(orgId, 
+      invitedBy._id, theAccount ? theAccount._id : null, memberEmail,
+    )
+    const payload = { refId: inviteRecord._id }
+    const baseUrl = this.configService.get('WEBSITE_URL')
+    const token = this.jwtService.sign(payload, { expiresIn: '7d'} )
+    const url = `${baseUrl}/accept-invite/${token}`
+    this.emailService.sendOrganizationInvite(invitedBy.email, memberEmail, url)
+  }
+
   async editRepo() {
 
   }
