@@ -117,6 +117,12 @@ export class OrgService {
 
   async resendInvite(invitedBy: Account, orgId: string, memberEmail: string) {
 
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+
+    const theIndex = theOrg.members.findIndex(member => member.email === memberEmail)
+    if (theIndex === -1) throw new BadRequestException()
+    else if (theOrg.members[theIndex].status === 'accepted') throw new BadRequestException()
+
     const theAccount = await this.accountService.findOneByEmail(memberEmail)
 
     const inviteRecord = await this.recordService.createOrgInviteRecord(orgId, 
@@ -127,13 +133,73 @@ export class OrgService {
     const token = this.jwtService.sign(payload, { expiresIn: '7d'} )
     const url = `${baseUrl}/accept-invite/${token}`
     this.emailService.sendOrganizationInvite(invitedBy.email, memberEmail, url)
+    return true
   }
 
   async editRepo() {
 
   }
 
-  async editMembers() {
+  async makeMemberAdmin(orgId, theAccount, theMember) {
+    // add to admin list
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+    const invitedAccount = await this.accountService.findOneByEmail(theMember)
+
+    let tempAdmins
+    if (theOrg.admins.includes(theAccount._id)) {
+      tempAdmins = theOrg.admins
+      tempAdmins.push(invitedAccount._id)
+    }
+
+    await this.orgModel.findOneAndUpdate({ _id: orgId },
+      { admins: tempAdmins,  $inc: { __v: 1 }},
+      { returnOriginal: false})
+    this.emailService.sendNewAdminNotice(theAccount.email, invitedAccount.email)
+    return true
+  }
+
+  async removeMemberAdmin(orgId, theAccount, theMember) {
+    // add to admin list
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+    const invitedAccount = await this.accountService.findOneByEmail(theMember)
+
+    let tempAdmins
+    if (theOrg.admins.includes(theAccount._id)) {
+      tempAdmins = theOrg.admins
+      tempAdmins = tempAdmins.filter(adminId => adminId !== invitedAccount._id)
+    }
+
+    await this.orgModel.findOneAndUpdate({ _id: orgId },
+      { admins: tempAdmins,  $inc: { __v: 1 }},
+      { returnOriginal: false})
+    return true
+  }
+
+  async removeMember(orgId: string, theAccount: Account, theMember: string) {
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+    const invitedAccount = await this.accountService.findOneByEmail(theMember)
+
+    if (theOrg.admins.length === 1) {
+      throw new BadRequestException('There must be at least 1 other assigned admin before you remove your admin status.')
+    }
+
+    let tempAdmins = theOrg.admins
+    if (theOrg.admins.includes(invitedAccount._id)) {
+      tempAdmins = theOrg.admins
+      tempAdmins = tempAdmins.filter(adminId => adminId !== invitedAccount._id)
+    }
+
+    let tempMembers = theOrg.members
+    if (theOrg.admins.includes(theAccount._id)) {
+      tempMembers = theOrg.admins
+      tempMembers = tempMembers.filter(adminId => adminId !== invitedAccount._id)
+    }
+
+    await this.orgModel.findOneAndUpdate({ _id: orgId },
+      { members: tempMembers, admins: tempAdmins, $inc: { __v: 1 }},
+      { returnOriginal: false})
+    this.emailService.sendRemovedFromOrganization(theAccount.email, invitedAccount.email)
+    return true
 
   }
 
@@ -235,7 +301,7 @@ export class OrgService {
       {
         customer: theOrg.stripeCustomerId,
         return_url:  `${baseUrl}/teams`,
-      }
+      },
     )
     return billingPortal
   }
