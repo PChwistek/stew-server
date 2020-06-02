@@ -177,28 +177,35 @@ export class OrgService {
 
   async removeMember(orgId: string, theAccount: Account, theMember: string) {
     const theOrg = await this.orgModel.findOne({ _id: orgId })
-    const invitedAccount = await this.accountService.findOneByEmail(theMember)
+    const memberAccount = await this.accountService.findOneByEmail(theMember)
+    const memberAccountExists = memberAccount !== null
+    const removingAdmin = memberAccountExists && theOrg.admins.includes(memberAccount._id)
 
-    if (theOrg.admins.length === 1) {
+    if (!memberAccountExists) {
+      if (theOrg.members.findIndex(orgMember => orgMember.email === theMember) === -1) throw new BadRequestException('Not a member')
+    }
+
+    if (memberAccountExists && removingAdmin && theOrg.admins.length === 1) {
       throw new BadRequestException('There must be at least 1 other assigned admin before you remove your admin status.')
     }
 
     let tempAdmins = theOrg.admins
-    if (theOrg.admins.includes(invitedAccount._id)) {
+    if (memberAccountExists && theOrg.admins.includes(memberAccount._id)) {
       tempAdmins = theOrg.admins
-      tempAdmins = tempAdmins.filter(adminId => adminId !== invitedAccount._id)
+      tempAdmins = tempAdmins.filter(adminId => adminId !== memberAccount._id)
     }
 
     let tempMembers = theOrg.members
     if (theOrg.admins.includes(theAccount._id)) {
-      tempMembers = theOrg.admins
-      tempMembers = tempMembers.filter(adminId => adminId !== invitedAccount._id)
+      tempMembers = theOrg.members
+      tempMembers = tempMembers.filter(orgMember => orgMember.email !== theMember)
     }
 
     await this.orgModel.findOneAndUpdate({ _id: orgId },
       { members: tempMembers, admins: tempAdmins, $inc: { __v: 1 }},
       { returnOriginal: false})
-    this.emailService.sendRemovedFromOrganization(theAccount.email, invitedAccount.email)
+
+    this.emailService.sendRemovedFromOrganization(theAccount.email, theMember)
     return true
 
   }

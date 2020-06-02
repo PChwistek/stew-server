@@ -170,7 +170,7 @@ export class EmailGatewayService {
         },
         Subject: {
           Charset: 'UTF-8',
-          Data: 'Stew Organization Invite',
+          Data: 'Stew Organization Removal',
         },
       },
     }

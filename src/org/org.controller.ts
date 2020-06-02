@@ -5,6 +5,7 @@ import { OrgService } from './org.service'
 import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 import { NewMembersPayloadDto } from './payloads/new-members-payload.dto'
 import { ResendEmailPayload } from './payloads/resend-email-payload.dto'
+import { RemoveMemberPayloadDto } from './payloads/remove-members-payload.dto'
 
 @Controller('/org')
 export class OrgController {
@@ -35,6 +36,14 @@ export class OrgController {
     const { account } = req.user
     const { newMembers, orgId } = newMembersPayload
     return await this.orgService.addMembers(account, orgId, newMembers)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/remove-member')
+  async removeMember(@Request() req, @Body() removeMemberPayload: RemoveMemberPayloadDto): Promise<any> {
+    const { account } = req.user
+    const { orgId, email } = removeMemberPayload
+    return await this.orgService.removeMember(orgId, account, email)
   }
 
   @UseGuards(AuthGuard('jwt'))
