@@ -47,4 +47,12 @@ export class RecordKeeperService {
       { returnOriginal: false})
   }
 
+  async findMostRecentInvite(orgId: string, memberEmail: string) {
+    const orgInvites = await this.orgInviteModel.find({ orgId, memberEmail })
+    const mostRecent = orgInvites.reduce((a, b) => {
+      return new Date(a.dateRequested) > new Date(b.dateRequested) ? a : b
+    })
+    return mostRecent
+  }
+
 }

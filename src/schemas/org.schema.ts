@@ -7,7 +7,7 @@ export const OrgSchema = new mongoose.Schema({
   admins: Array,
   numberOfSeats: Number,
   paidSince: Date,
-  lastPaid: Date,
+  validUntil: Date,
   plan: String,
   stripeCustomerId: String,
 })

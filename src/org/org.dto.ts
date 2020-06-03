@@ -11,16 +11,16 @@ export class OrgDto extends OrgPayloadDto {
   @IsNotEmpty()
   readonly admins: Array<string>
 
-  readonly lastPaid: Date
+  readonly validUntil: Date
 
   readonly stripeCustomerId: string
 
-  constructor(name, members, admins, repos, numberOfSeats, paidSince, lastPaid, plan, stripeCustomerId) {
+  constructor(name, members, admins, repos, numberOfSeats, paidSince, validUntil, plan, stripeCustomerId) {
     super(name, numberOfSeats, paidSince, plan)
     this.repos = repos
     this.admins = admins
     this.members = members
-    this.lastPaid = lastPaid
+    this.validUntil = validUntil
     this.stripeCustomerId = stripeCustomerId
   }
 

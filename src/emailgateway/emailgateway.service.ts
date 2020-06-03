@@ -215,7 +215,7 @@ export class EmailGatewayService {
         },
         Subject: {
           Charset: 'UTF-8',
-          Data: 'You have been removed from a Stew organization',
+          Data: 'You have been invited to a Stew organization',
         },
       },
     }

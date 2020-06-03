@@ -23,6 +23,11 @@ export class OrgController {
     return this.orgService.completePurchase(request.rawBody, signature)
   }
 
+  @Post('/sub-paid')
+  async update(@Headers('stripe-signature') signature, @Req() request: any) {
+    return this.orgService.subscriptionRenewal(request.rawBody, signature)
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('/dashboard')
   async getOrgDash(@Request() req): Promise<any> {
@@ -66,4 +71,5 @@ export class OrgController {
   async goToStripSelfServe(@Param() params): Promise<any> {
     return await this.orgService.generateSelfServeLink(params.id)
   }
+
 }

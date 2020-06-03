@@ -12,7 +12,7 @@ export interface Org extends Document {
   admins: Array<string>,
   numberOfSeats: number,
   readonly paidSince: Date,
-  lastPaid: Date,
+  validUntil: Date,
   plan: string,
   readonly stripeCustomerId: string,
 }

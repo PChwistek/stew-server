@@ -26,11 +26,11 @@ export class OrgService {
     private readonly recordService: RecordKeeperService,
   ) {}
 
-  async create(user: Account, orgPayloadDto: OrgPayloadDto, stripeCustomerId: string): Promise<Org> {
+  async create(user: Account, orgPayloadDto: OrgPayloadDto, stripeCustomerId: string, validUntil: Date): Promise<Org> {
     const { _id, email } = user
     const fullOrg = new OrgDto(
       orgPayloadDto.name, [{ email, status: 'accepted' }], [_id], [],
-      orgPayloadDto.numberOfSeats, new Date(), new Date(),
+      orgPayloadDto.numberOfSeats, new Date(), validUntil,
       orgPayloadDto.plan,
       stripeCustomerId,
     )
@@ -125,9 +125,18 @@ export class OrgService {
 
     const theAccount = await this.accountService.findOneByEmail(memberEmail)
 
+    const mostRecentInvite = await this.recordService.findMostRecentInvite(orgId, memberEmail)
+
+    let minutesDiff = (new Date().getTime() - mostRecentInvite.dateRequested.getTime()) / 1000
+    minutesDiff /= 60
+    if (Math.abs(Math.round(minutesDiff)) < 15) {
+      throw new BadRequestException('Please wait 15 minutes before re-sending an invite.')
+    }
+
     const inviteRecord = await this.recordService.createOrgInviteRecord(orgId, 
       invitedBy._id, theAccount ? theAccount._id : null, memberEmail,
     )
+
     const payload = { refId: inviteRecord._id }
     const baseUrl = this.configService.get('WEBSITE_URL')
     const token = this.jwtService.sign(payload, { expiresIn: '7d'} )
@@ -246,7 +255,7 @@ export class OrgService {
     let event
 
     try {
-      event = this.stripeClient.webhooks.constructEvent(body, sig, this.configService.get('STRIPE_WEBHOOK'))
+      event = this.stripeClient.webhooks.constructEvent(body, sig, this.configService.get('STRIPE_WEBHOOK_INITIAL_PURCHASE'))
     } catch (err) {
       console.log('err', err)
       throw new BadRequestException(`Webhook Error: ${err.message}`)
@@ -256,7 +265,8 @@ export class OrgService {
       const session = event.data.object
       const theAccount = await this.accountService.findOneByEmail(session.customer_email)
       const thePurchase = await this.stripeClient.subscriptions.retrieve(session.subscription)
-      console.log('the purchase', thePurchase)
+
+      const periodEnd = new Date(thePurchase.current_period_end)
 
       const thePlans = thePurchase.items.data
       let numSeats = 0
@@ -274,8 +284,30 @@ export class OrgService {
         }
       }
 
-      const newOrg = await this.create(theAccount, new OrgPayloadDto('', numSeats, new Date(), plan), thePurchase.customer.toString())
+      const newOrg = await this.create(theAccount, new OrgPayloadDto('', numSeats, new Date(), plan), thePurchase.customer.toString(), periodEnd)
       this.accountService.setOrgs(theAccount._id, newOrg._id, true)
+
+    }
+    // Return a response to acknowledge receipt of the event
+    return true
+  }
+
+  async subscriptionRenewal(body, sig) {
+    let event
+    try {
+      event = this.stripeClient.webhooks.constructEvent(body, sig, this.configService.get('STRIPE_WEBHOOK_RENEW'))
+    } catch (err) {
+      console.log('err', err)
+      throw new BadRequestException(`Webhook Error: ${err.message}`)
+    }
+
+    if (event.type === 'invoice.payment_succeeded') {
+      const session = event.data.object
+      const periodEnd = new Date(session.current_period_end)
+
+      const theOrg = await this.orgModel.findOne({ stripeCustomerId: session.customer })
+
+      await this.orgModel.findOneAndUpdate({ _id: theOrg._id }, { validUntil: periodEnd })
 
     }
     // Return a response to acknowledge receipt of the event
