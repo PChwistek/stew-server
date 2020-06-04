@@ -1,11 +1,14 @@
 
-import { Controller, Request, Post, UseGuards, Body, Headers, Req, Get, Param } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Headers, Req, Get, Param, Put } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { OrgService } from './org.service'
 import { PurchasePlanPayload } from './payloads/purchase-plan-payload.dto'
 import { NewMembersPayloadDto } from './payloads/new-members-payload.dto'
 import { ResendEmailPayload } from './payloads/resend-email-payload.dto'
 import { RemoveMemberPayloadDto } from './payloads/remove-members-payload.dto'
+import { NewRepoPayload } from './payloads/new-repo-payload.dto'
+import { EditRepoPayload } from './payloads/edit-repo-payload.dto'
+import { AddRecipeToRepoDto } from './payloads/add-recipe-to-repo.payload.dto'
 
 @Controller('/org')
 export class OrgController {
@@ -72,4 +75,24 @@ export class OrgController {
     return await this.orgService.generateSelfServeLink(params.id)
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/repos')
+  async addRepo(@Request() req, @Body() newRepoPayload: NewRepoPayload): Promise<any> {
+    const { account } = req.user
+    return await this.orgService.addRepo(account, newRepoPayload)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Put('/repos')
+  async editRepo(@Request() req, @Body() editRepoPayload: EditRepoPayload): Promise<any> {
+    const { account } = req.user
+    return await this.orgService.editRepo(account, editRepoPayload)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/repos/recipe')
+  async addRecipeToRepo(@Request() req, @Body() addRecipePayload: AddRecipeToRepoDto): Promise<any> {
+    const { account } = req.user
+    return await this.orgService.addRecipeToRepo(account, addRecipePayload)
+  }
 }

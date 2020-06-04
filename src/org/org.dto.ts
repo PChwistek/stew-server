@@ -23,5 +23,4 @@ export class OrgDto extends OrgPayloadDto {
     this.validUntil = validUntil
     this.stripeCustomerId = stripeCustomerId
   }
-
 }

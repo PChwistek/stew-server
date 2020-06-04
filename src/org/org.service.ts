@@ -13,6 +13,11 @@ import { Account } from '../account/account.interface'
 import { AccountService } from '../account/account.service'
 import { EmailGatewayService } from '../emailgateway/emailgateway.service'
 import { RecordKeeperService } from '../recordkeeper/recordkeeper.service'
+import { NewRepoPayload } from './payloads/new-repo-payload.dto'
+import { RepoDto } from './repo.dto'
+import { EditRepoPayload } from './payloads/edit-repo-payload.dto'
+import { AddRecipeToRepoDto } from './payloads/add-recipe-to-repo.payload.dto'
+import { v4 as uuidv4 } from 'uuid'
 
 @Injectable()
 export class OrgService {
@@ -39,10 +44,18 @@ export class OrgService {
     return createdOrg
   }
 
-  // add repos
+  async addRepo(user: Account, repoPayload: NewRepoPayload) {
+    const { orgId } = repoPayload
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
 
-  async addRepo(user: Account, repoAdd) {
+    const tempRepos = theOrg.repos
 
+    const newRpo = new RepoDto(uuidv4(), repoPayload.name, repoPayload.recipes, repoPayload.permittedUsers)
+
+    tempRepos.push(newRpo)
+
+    await this.orgModel.findOneAndUpdate({ _id: orgId }, { repos: tempRepos })
+    return true
   }
 
   async addMembers(invitedBy: Account, orgId: string, members: Array<string>) {
@@ -145,8 +158,32 @@ export class OrgService {
     return true
   }
 
-  async editRepo() {
+  async editRepo(user: Account, editRepoPayload: EditRepoPayload) {
+    const { orgId } = editRepoPayload
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
 
+    const theRepoIndex = theOrg.repos.findIndex(repo => repo.repoId === editRepoPayload.repoId)
+    const theRepo = new RepoDto(editRepoPayload.repoId, editRepoPayload.name, editRepoPayload.recipes, editRepoPayload.permittedUsers)
+    const repos = theOrg.repos
+    repos[theRepoIndex] = theRepo
+
+    await this.orgModel.findOneAndUpdate({ _id: editRepoPayload.orgId }, { repos })
+    return true
+  }
+
+  async addRecipeToRepo(user: Account, addRecipeDto: AddRecipeToRepoDto) {
+    const { orgId, repoId, recipe } = addRecipeDto
+    const theOrg = await this.orgModel.findOne({ _id: orgId })
+
+    const repos = theOrg.repos
+    const theRepoIndex = theOrg.repos.findIndex(repo => repo.repoId === repoId)
+
+    const theRepo = theOrg.repos[theRepoIndex]
+    theRepo.recipes.push(recipe)
+    repos[theRepoIndex] = theRepo
+
+    await this.orgModel.findOneAndUpdate({ _id: addRecipeDto.orgId }, { repos })
+    return true
   }
 
   async makeMemberAdmin(orgId, theAccount, theMember) {
@@ -266,7 +303,7 @@ export class OrgService {
       const theAccount = await this.accountService.findOneByEmail(session.customer_email)
       const thePurchase = await this.stripeClient.subscriptions.retrieve(session.subscription)
 
-      const periodEnd = new Date(thePurchase.current_period_end)
+      const periodEnd = new Date(thePurchase.current_period_end * 1000)
 
       const thePlans = thePurchase.items.data
       let numSeats = 0
@@ -303,7 +340,7 @@ export class OrgService {
 
     if (event.type === 'invoice.payment_succeeded') {
       const session = event.data.object
-      const periodEnd = new Date(session.current_period_end)
+      const periodEnd = new Date(session.current_period_end * 1000)
 
       const theOrg = await this.orgModel.findOne({ stripeCustomerId: session.customer })
 
