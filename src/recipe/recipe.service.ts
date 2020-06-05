@@ -14,6 +14,7 @@ import { RecipeByLinkDto } from './Payloads/recipe-by-link.payload.dto'
 import { ArchiveRecipeDto } from './archive-recipe.dto'
 import { RecipePermissionsPayload } from './Payloads/recipe-permissions-payload.dto'
 import { RecipeDiffDto } from './recipe-diff.dto'
+import { OrgService } from '../org/org.service'
 
 @Injectable()
 export class RecipeService {
@@ -22,6 +23,7 @@ export class RecipeService {
   @InjectModel('Recipe-Diff') private readonly recipeDiffModel: Model<RecipeDiff>,
   @InjectModel('Archived-Recipe') private readonly recipeArchiveModel: Model<RecipeHistory>,
   private readonly accountService: AccountService,
+  private readonly orgService: OrgService,
   ) {}
 
   async createRecipe(user: Account, recipePayloadDto: RecipePayloadDto): Promise<Recipe> {
@@ -122,6 +124,13 @@ export class RecipeService {
 
   async syncRecipes(userId: string, updated: Date, forced: boolean) {
     const theUser = await this.accountService.findOneById(userId)
+
+    let repos = []
+    if (theUser.orgs.length > 0) {
+      const foundRepos = await this.orgService.getRepos(theUser.orgs[0])
+      repos = foundRepos.filter(repo => repo.permittedUsers.findIndex(id => `${id}` === `${userId}`) > -1)
+    }
+
     if (new Date(theUser.lastUpdated) > new Date(updated) || forced) {
       let recipes =  await this.recipeModel.find({ authorId: userId }).exec()
 
@@ -130,14 +139,17 @@ export class RecipeService {
         recipes = recipes.concat(foundRecipe)
       }
 
+      // add repo recipes
+
       return {
         upToDate: false,
         lastUpdated: theUser.lastUpdated,
         recipes,
         favoriteRecipes: theUser.favoriteRecipes,
+        repos,
       }
     }
-    return { upToDate: true, lastUpdated: theUser.lastUpdated, recipes: [] }
+    return { upToDate: true, lastUpdated: theUser.lastUpdated, recipes: [], repos, favoriteRecipes: theUser.favoriteRecipes }
   }
 
 }

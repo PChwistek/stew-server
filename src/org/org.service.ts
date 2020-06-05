@@ -49,8 +49,9 @@ export class OrgService {
     const theOrg = await this.orgModel.findOne({ _id: orgId })
 
     const tempRepos = theOrg.repos
-
-    const newRpo = new RepoDto(uuidv4(), repoPayload.name, repoPayload.recipes, repoPayload.permittedUsers)
+    const permittedUsers = repoPayload.permittedUsers
+    if (!permittedUsers.includes(user._id)) permittedUsers.push(user._id)
+    const newRpo = new RepoDto(uuidv4(), repoPayload.name, repoPayload.recipes, permittedUsers)
 
     tempRepos.push(newRpo)
 
@@ -349,6 +350,11 @@ export class OrgService {
     }
     // Return a response to acknowledge receipt of the event
     return true
+  }
+
+  async getRepos(orgId: string) {
+    const org = await this.orgModel.findOne({ _id: orgId })
+    return org.repos
   }
 
   async getDashboard(user: Account) {
