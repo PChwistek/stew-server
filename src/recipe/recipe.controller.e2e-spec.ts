@@ -128,7 +128,6 @@ describe('Recipe Controller e2e', () => {
     const response = await request(app.getHttpServer())
       .get(`/recipe/share/${shareId}`)
       .expect(401)
-    console.log('response', response)
     // expect(hasKeys(response))
 })
 

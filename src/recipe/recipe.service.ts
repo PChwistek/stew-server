@@ -15,6 +15,7 @@ import { ArchiveRecipeDto } from './archive-recipe.dto'
 import { RecipePermissionsPayload } from './Payloads/recipe-permissions-payload.dto'
 import { RecipeDiffDto } from './recipe-diff.dto'
 import { OrgService } from '../org/org.service'
+import { AddRecipeToRepoDto } from '../org/payloads/add-recipe-to-repo.payload.dto'
 
 @Injectable()
 export class RecipeService {
@@ -93,7 +94,8 @@ export class RecipeService {
   }
 
   async editRecipePermissions(user: Account, editRecipePermissions: RecipePermissionsPayload): Promise<any> {
-    const { _id } = editRecipePermissions
+    const { _id, orgId } = editRecipePermissions
+    console.log('payload', editRecipePermissions)
     const theRecipe = await this.recipeModel.findOne({ _id })
     if (String(user._id) === theRecipe.authorId) {
       const newRecipe = await this.recipeModel.findOneAndUpdate({ _id }, {
@@ -101,12 +103,29 @@ export class RecipeService {
         repos: editRecipePermissions.repos,
         $inc: { __v: 1 },
       }, { new: true })
-      // add to repo
+
+      let updatedRepos = []
+      if (orgId) {
+        for (const repo of editRecipePermissions.repos) {
+          if (repo) {
+            const newOrg = await this.orgService.addRecipeToRepo(user, new AddRecipeToRepoDto(repo.value,
+              editRecipePermissions.orgId,
+              editRecipePermissions._id,
+            ))
+            updatedRepos = newOrg.repos
+          }
+        }
+      }
+
       const theDiff = diff(theRecipe, newRecipe)
       const toHistory = new RecipeDiffDto(theRecipe._id, new Date(), theDiff)
       const savedDiff = new this.recipeDiffModel(toHistory)
       savedDiff.save()
-      return newRecipe
+
+      return {
+        newRecipe,
+        updatedRepos,
+      }
 
     } else {
       throw new BadRequestException('Recipe not created by this user')
@@ -141,11 +160,12 @@ export class RecipeService {
 
       // add repo recipes
 
+
       return {
         upToDate: false,
         lastUpdated: theUser.lastUpdated,
         recipes,
-        favoriteRecipes: theUser.favoriteRecipes,
+        favorites: theUser.favoriteRecipes,
         repos,
       }
     }

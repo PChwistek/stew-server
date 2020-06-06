@@ -50,6 +50,7 @@ export class AuthService {
       username: user.username,
       lastUpdated: user.lastUpdated,
       access_token: this.jwtService.sign(payload),
+      orgs: user.orgs,
     }
   }
 

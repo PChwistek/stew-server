@@ -172,19 +172,20 @@ export class OrgService {
     return true
   }
 
-  async addRecipeToRepo(user: Account, addRecipeDto: AddRecipeToRepoDto) {
+  async addRecipeToRepo(user: Account, addRecipeDto: AddRecipeToRepoDto): Promise<Org> {
     const { orgId, repoId, recipe } = addRecipeDto
     const theOrg = await this.orgModel.findOne({ _id: orgId })
-
     const repos = theOrg.repos
     const theRepoIndex = theOrg.repos.findIndex(repo => repo.repoId === repoId)
 
     const theRepo = theOrg.repos[theRepoIndex]
-    theRepo.recipes.push(recipe)
-    repos[theRepoIndex] = theRepo
+    if (!theRepo.recipes.includes(recipe)) {
+      theRepo.recipes.push(recipe)
+      repos[theRepoIndex] = theRepo
+    }
 
-    await this.orgModel.findOneAndUpdate({ _id: addRecipeDto.orgId }, { repos })
-    return true
+    const newOrg = await this.orgModel.findOneAndUpdate({ _id: addRecipeDto.orgId }, { repos }, { returnOriginal: false })
+    return newOrg
   }
 
   async makeMemberAdmin(orgId, theAccount, theMember) {
