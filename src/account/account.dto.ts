@@ -1,20 +1,25 @@
-import { CreateAccountDto } from './create-account.dto'
 
 export class AccountDto {
-  readonly username: string
   readonly email: string
   readonly passwordHash: string
-  karma: number
+  username: string
   dateCreated: Date
   favoriteRecipes: Array<string>
+  lastUpdated: Date
+  org: Array<string>
 
-  constructor(createAccountDto: CreateAccountDto) {
-    this.username = createAccountDto.username
-    this.email = createAccountDto.email
-    this.passwordHash = createAccountDto.passwordHash
-    this.karma = 0
+  constructor(email, passwordHash, username, org) {
+    this.email = email
+    this.passwordHash = passwordHash
+    this.username = username
     this.dateCreated = new Date()
     this.favoriteRecipes = []
+    this.lastUpdated = new Date()
+    this.org = org
+  }
+
+  updateLastUpdated() {
+    this.lastUpdated = new Date()
   }
 
 }

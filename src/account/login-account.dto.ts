@@ -1,11 +1,17 @@
-import { IsNotEmpty } from 'class-validator'
+import { IsNotEmpty, IsEmail } from 'class-validator'
 
 export class LoginAccountDto {
 
+  @IsEmail()
   @IsNotEmpty()
-  readonly username: string
+  email: string
 
   @IsNotEmpty()
-  readonly password: string
+  password: string
+
+  constructor(email: string, password: string ) {
+    this.email = email
+    this.password = password
+  }
 
 }
