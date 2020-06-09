@@ -21,6 +21,7 @@ const theRecipe = {
         index: 0,
       }],
     }],
+    repos: [],
     linkPermissions: ['any'],
 }
 
@@ -145,7 +146,7 @@ describe('Recipe Controller e2e', () => {
       if (!('upToDate' in res.body)) throw new Error('missing upToDate key')
       if (!('lastUpdated' in res.body)) throw new Error('missing lastUpdated key')
       if (!('recipes' in res.body)) throw new Error('missing recipes key')
-      if (!('favoriteRecipes' in res.body)) throw new Error('missing favoriteRecipes key')
+      if (!('favorites' in res.body)) throw new Error('missing favorites key')
     }
     return request(app.getHttpServer())
       .post('/recipe/sync')
@@ -169,8 +170,8 @@ describe('Recipe Controller e2e', () => {
         .expect(201)
 
       function hasRecipeId(res) {
-        const { favoriteRecipes } = res.body
-        expect(favoriteRecipes.findIndex(id => recipeId === id) > -1)
+        const { favorites } = res.body
+        expect(favorites.findIndex(id => recipeId === id) > -1)
       }
 
       return request(app.getHttpServer())
@@ -193,8 +194,8 @@ describe('Recipe Controller e2e', () => {
       .expect(201)
 
     function hasRecipeId(res) {
-        const { favoriteRecipes } = res.body
-        expect(favoriteRecipes.findIndex(id => recipeId === id) === -1)
+        const { favorites } = res.body
+        expect(favorites.findIndex((id: string) => recipeId === id) === -1)
       }
 
     return request(app.getHttpServer())
