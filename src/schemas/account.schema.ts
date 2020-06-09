@@ -9,4 +9,5 @@ export const AccountSchema = new mongoose.Schema({
   dateCreated: Date,
   favoriteRecipes: Array,
   importedRecipes: Array,
+  orgs: Array,
 })

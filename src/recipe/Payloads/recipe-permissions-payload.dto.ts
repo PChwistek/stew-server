@@ -8,12 +8,15 @@ export class RecipePermissionsPayload {
   @IsNotEmpty()
   linkPermissions: Array<string>
 
-  repos: Array<string>
+  orgId: string
 
-  constructor(id, linkPermissions, repos) {
+  repos: Array<{ value: string, label: string }>
+
+  constructor(id, linkPermissions, repos, orgId) {
     this._id = id
     this.linkPermissions = linkPermissions
     this.repos = repos
+    this.orgId = orgId
   }
 
 }

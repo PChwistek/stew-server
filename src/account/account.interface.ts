@@ -7,6 +7,7 @@ export interface Account extends Document {
   readonly passwordHash: string
   readonly karma: number
   readonly dateCreated: Date
+  orgs: Array<string>,
   lastUpdated: Date
   favoriteRecipes: Array<string>
   importedRecipes: Array<string>

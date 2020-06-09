@@ -11,9 +11,9 @@ export class AccountController {
   @UseGuards(AuthGuard('jwt'))
   @Post('profile')
   async setProfile(@Request() req, @Body() profilePayloadDto: ProfilePayloadDto): Promise<string> {
-    const { user } = req
-    await this.accountService.addProfile(user._id, profilePayloadDto.username)
-    this.accountService.setUpdatedTime(user._id)
+    const { account } = req.user
+    await this.accountService.addProfile(account._id, profilePayloadDto.username)
+    this.accountService.setUpdatedTime(account._id)
     return profilePayloadDto.username
   }
 

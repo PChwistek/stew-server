@@ -10,7 +10,7 @@ export class AccountService {
   constructor(@InjectModel('Account') private readonly accountModel: Model<Account>) {}
 
   async create(accountPayloadDto: AccountPayloadDto, passwordHash: string): Promise<Account> {
-    const fullAccount = new AccountDto(accountPayloadDto.email, passwordHash, '')
+    const fullAccount = new AccountDto(accountPayloadDto.email, passwordHash, '', [''])
     const createdAccount = new this.accountModel(fullAccount)
     await createdAccount.save()
     return createdAccount
@@ -63,12 +63,36 @@ export class AccountService {
     return await this.accountModel.findOneAndUpdate({ _id: userId }, { importedRecipes }, { returnOriginal: false })
   }
 
+  async setNewPassword(_id: string, newPasswordHash: string) {
+    await this.accountModel.findOneAndUpdate({ _id }, { passwordHash: newPasswordHash }, { returnOriginal: false })
+    return true
+  }
+
   async findOneById(_id: string): Promise<Account> {
     return await this.accountModel.findOne({ _id }).exec()
   }
 
   async findOneByEmail(email: string): Promise<Account> {
     return await this.accountModel.findOne({ email }).exec()
+  }
+
+  async setOrgs(_id: string, orgId: string, isNew: boolean): Promise<Account> {
+    const user = await this.accountModel.findOne({ _id })
+    let { orgs } = user
+
+    if (orgs.typeof === 'null' || orgs.typeof === 'undefined') orgs = []
+
+    const index = orgs.findIndex(id => id === orgId)
+    if (isNew) {
+      if (index === -1) {
+        orgs.push(orgId)
+      }
+    } else {
+      if (index > -1) {
+        orgs.splice(index, 1)
+      }
+    }
+    return await this.accountModel.findOneAndUpdate({ _id }, { orgs }, { returnOriginal: false})
   }
 
 }
