@@ -11,9 +11,12 @@ export class AccountPayloadDto {
   @IsNotEmpty()
   readonly password: string
 
-  constructor(email, password) {
+  readonly newsletter: boolean
+
+  constructor(email, password, newsletter) {
     this.email = email
     this.password = password
+    this.newsletter = newsletter
   }
 
 }

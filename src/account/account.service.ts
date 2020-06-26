@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Account } from './account.interface'
 import { AccountDto } from './account.dto'
 import { AccountPayloadDto } from './account-payload.dto'
+import axios from 'axios'
 
 @Injectable()
 export class AccountService {
@@ -13,6 +14,24 @@ export class AccountService {
     const fullAccount = new AccountDto(accountPayloadDto.email, passwordHash, '', [''])
     const createdAccount = new this.accountModel(fullAccount)
     await createdAccount.save()
+
+    if (accountPayloadDto.newsletter) {
+      try {
+        await axios.post('https://us4.api.mailchimp.com/3.0/lists/c65f16bba9/members/', { 
+          email_address: accountPayloadDto.email,
+          status: 'subscribed',
+        },
+        {
+          auth: {
+            username: 'phil',
+            password: '8d52e8b330c95ecac1e8218aaca81b0b-us4',
+          },
+        })
+      } catch(error) {
+        console.log('error', error)
+      }
+    }
+
     return createdAccount
   }
 
