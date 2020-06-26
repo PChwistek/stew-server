@@ -11,7 +11,7 @@ export const RecipeSchema = new mongoose.Schema({
   config: Array,
   dateCreated: Date,
   dateModified: Date,
-  shareableId: { type: String, default: uuidv4() },
+  shareableId: { type: String, default: uuidv4 },
   linkPermissions: Array,
   repos: Array,
   global: Boolean,
