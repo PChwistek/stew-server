@@ -54,6 +54,17 @@ export class AuthService {
     }
   }
 
+  async grabNewToken(email: string, jwt: string) {
+
+    const jwtDetails = this.jwtService.decode(jwt)
+    console.log('jwt Details', jwtDetails)
+
+    // const payload = { email, sub: 'the_secret_sauce_09013?//1' }
+
+    // const payload =
+
+  }
+
   async generateResetLink(email: string, ip: string, device: string) {
     const record = await this.recordService.createPasswordChangeRecord(email, ip, device)
     const payload = { refId: record._id }

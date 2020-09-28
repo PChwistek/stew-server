@@ -19,7 +19,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/validate')
-  async checkToken() {
+  async checkToken(@Request() req) {
     return true
   }
 
