@@ -6,6 +6,7 @@ import { LoginAccountDto } from '../account/login-account.dto'
 import { AccountPayloadDto } from '../account/account-payload.dto'
 import { ResetRequestPayload } from './reset-request-payload.dto'
 import { ResetPasswordPayload } from './reset-password-payload.dto'
+import { OAuthPayloadDto } from '../account/oauth-payload.dto'
 
 @Controller('/auth')
 export class AuthController {
@@ -56,6 +57,19 @@ export class AuthController {
     }
 
     throw new BadRequestException('Account with this email already exists')
+  }
+
+  @Post('/oauth')
+  async handleOAuthAccountRegister(@Body() oAuthAccountDto: OAuthPayloadDto) {
+    const exists = this.authService.userExists(oAuthAccountDto.email)
+    const validToken = await this.authService.checkOAuth(oAuthAccountDto)
+    if (!validToken) {
+      throw new BadRequestException('Bad OAuth Credentials')
+    }
+    if (!exists) {
+      await this.authService.createUserOAuth(oAuthAccountDto)
+    }
+    return this.authService.login(new LoginAccountDto(oAuthAccountDto.email, ''))
   }
 
   @Post('/reset-request')

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty , IsLowercase, Length} from 'class-validator'
+import { IsEmail, IsNotEmpty , IsLowercase, Length } from 'class-validator'
 
 export class AccountPayloadDto {
 
@@ -18,5 +18,4 @@ export class AccountPayloadDto {
     this.password = password
     this.newsletter = newsletter
   }
-
 }
