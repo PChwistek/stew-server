@@ -12,10 +12,13 @@ export class OAuthPayloadDto {
 
   readonly newsletter: boolean
 
-  constructor(email, tokenId, newsletter) {
+  readonly isExt: boolean
+
+  constructor(email, tokenId, newsletter, isExt) {
     this.email = email
     this.tokenId = tokenId
     this.newsletter = newsletter
+    this.isExt = isExt
   }
 
 }

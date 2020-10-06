@@ -72,6 +72,19 @@ export class AuthController {
     return this.authService.login(new LoginAccountDto(oAuthAccountDto.email, ''))
   }
 
+  @Post('/oauth-ext')
+  async handleOAuthExtAccountRegister(@Body() oAuthAccountDto: OAuthPayloadDto) {
+    const exists = this.authService.userExists(oAuthAccountDto.email)
+    const validToken = await this.authService.checkOAuthExt(oAuthAccountDto)
+    if (!validToken) {
+      throw new BadRequestException('Bad OAuth Credentials')
+    }
+    if (!exists) {
+      await this.authService.createUserOAuth(oAuthAccountDto)
+    }
+    return this.authService.login(new LoginAccountDto(oAuthAccountDto.email, ''))
+  }
+
   @Post('/reset-request')
   async requestReset(@Headers() headers, @Request() request, @Body() resetPasswordPayload: ResetRequestPayload) {
     const exists = await this.authService.userExists(resetPasswordPayload.email)
