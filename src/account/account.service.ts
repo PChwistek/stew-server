@@ -5,6 +5,7 @@ import { Account } from './account.interface'
 import { AccountDto } from './account.dto'
 import { AccountPayloadDto } from './account-payload.dto'
 import axios from 'axios'
+import { OAuthPayloadDto } from './oauth-payload.dto'
 
 @Injectable()
 export class AccountService {
@@ -19,6 +20,32 @@ export class AccountService {
       try {
         await axios.post('https://us4.api.mailchimp.com/3.0/lists/c65f16bba9/members/', { 
           email_address: accountPayloadDto.email,
+          status: 'subscribed',
+        },
+        {
+          auth: {
+            username: 'phil',
+            password: '8d52e8b330c95ecac1e8218aaca81b0b-us4',
+          },
+        })
+      } catch(error) {
+        console.log('error', error)
+      }
+    }
+
+    return createdAccount
+  }
+
+  async createAccountFromOAuth(payload: OAuthPayloadDto) {
+    const fullAccount = new AccountDto(payload.email, '', '', [''])
+    fullAccount.createGoogleAccount(payload.tokenId)
+    const createdAccount = new this.accountModel(fullAccount)
+    await createdAccount.save()
+
+    if (payload.newsletter) {
+      try {
+        await axios.post('https://us4.api.mailchimp.com/3.0/lists/c65f16bba9/members/', { 
+          email_address: payload.email,
           status: 'subscribed',
         },
         {
@@ -88,11 +115,21 @@ export class AccountService {
   }
 
   async findOneById(_id: string): Promise<Account> {
-    return await this.accountModel.findOne({ _id }).exec()
+    try {
+      return await this.accountModel.findOne({ _id }).exec()
+    } catch (error) {
+      console.log(error)
+      return null
+    }
   }
 
   async findOneByEmail(email: string): Promise<Account> {
-    return await this.accountModel.findOne({ email }).exec()
+    try {
+      return await this.accountModel.findOne({ email }).exec()
+    } catch (error) {
+      console.log(error)
+      return null
+    }
   }
 
   async setOrgs(_id: string, orgId: string, isNew: boolean): Promise<Account> {

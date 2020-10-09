@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import { AccountService } from '../account/account.service'
@@ -8,6 +8,8 @@ import { LoginAccountDto } from '../account/login-account.dto'
 import { ConfigService } from '../config/config.service'
 import { EmailGatewayService } from '../emailgateway/emailgateway.service'
 import { RecordKeeperService } from '../recordkeeper/recordkeeper.service'
+import { OAuthPayloadDto } from '../account/oauth-payload.dto'
+import axios from 'axios'
 
 @Injectable()
 export class AuthService {
@@ -42,6 +44,22 @@ export class AuthService {
     return await this.accountService.create(payloadAccountDto, passwordHash)
   }
 
+  async checkOAuth(payload: OAuthPayloadDto) {
+    const googleResponse = await axios.post(`https://oauth2.googleapis.com/tokeninfo?id_token=${payload.tokenId}`)
+    const { data: { email } } = googleResponse
+    return email === payload.email
+  }
+
+  async checkOAuthExt(payload: OAuthPayloadDto) {
+    const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${payload.tokenId}`)
+    const { data: { email } } = googleResponse
+    return email === payload.email
+  }
+
+  async createUserOAuth(payload: OAuthPayloadDto) {
+    return await this.accountService.createAccountFromOAuth(payload)
+  }
+
   async login(account: LoginAccountDto) {
     const payload = { email: account.email, sub: 'the_secret_sauce_09013?//1' }
     const user = await this.accountService.findOneByEmail(account.email)
@@ -52,6 +70,17 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       orgs: user.orgs,
     }
+  }
+
+  async grabNewToken(email: string, jwt: string) {
+
+    const jwtDetails = this.jwtService.decode(jwt)
+    console.log('jwt Details', jwtDetails)
+
+    // const payload = { email, sub: 'the_secret_sauce_09013?//1' }
+
+    // const payload =
+
   }
 
   async generateResetLink(email: string, ip: string, device: string) {
