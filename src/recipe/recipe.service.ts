@@ -137,6 +137,10 @@ export class RecipeService {
     return await this.recipeModel.find({ shareableId: id }).exec()
   }
 
+  async getRecipeById(id: string) {
+    return await this.recipeModel.find({ _id: id }).exec()
+  }
+
   async getRecipesByAuthorId(_id: string) {
     return await this.recipeModel.find({ authorId: _id }).exec()
   }
@@ -159,7 +163,6 @@ export class RecipeService {
       }
 
       // add repo recipes
-
 
       return {
         upToDate: false,

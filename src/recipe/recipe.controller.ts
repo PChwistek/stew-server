@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
@@ -31,11 +31,33 @@ export class RecipeController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/byAuthor')
-  async getRecipesByAuthor(@Request() req): Promise<Array<Recipe>> {
+  @Get('/:id')
+  async getRecipeById(@Request() req, @Param() params) {
+    // check if already imported or is owned by
     const { account } = req.user
-    const recipes = await this.recipeService.getRecipesByAuthorId(account._id)
-    return recipes
+    const recipe = await this.recipeService.getRecipeById(params.id)
+    if (!recipe || recipe.length < 1) {
+      return new NotFoundException()
+    }
+
+    const isAuthor = recipe[0].authorId === `${account._id}`
+
+    if (!isAuthor) {
+      return new ForbiddenException('You don\t have access to this recipe.')
+    }
+
+    return {
+      recipe,
+      alreadyInLibrary: true,
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/byAuthor')
+  async getRecipesByAuthor(@Request() req) {
+    // const { account } = req.user
+    // const recipes = await this.recipeService.getRecipesByAuthorId(account._id)
+    // return recipes
   }
 
   @UseGuards(AuthGuard('jwt'))
