@@ -31,33 +31,11 @@ export class RecipeController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/:id')
-  async getRecipeById(@Request() req, @Param() params) {
-    // check if already imported or is owned by
-    const { account } = req.user
-    const recipe = await this.recipeService.getRecipeById(params.id)
-    if (!recipe || recipe.length < 1) {
-      return new NotFoundException()
-    }
-
-    const isAuthor = recipe[0].authorId === `${account._id}`
-
-    if (!isAuthor) {
-      return new ForbiddenException('You don\t have access to this recipe.')
-    }
-
-    return {
-      recipe,
-      alreadyInLibrary: true,
-    }
-  }
-
-  @UseGuards(AuthGuard('jwt'))
   @Get('/byAuthor')
   async getRecipesByAuthor(@Request() req) {
-    // const { account } = req.user
-    // const recipes = await this.recipeService.getRecipesByAuthorId(account._id)
-    // return recipes
+    const { account } = req.user
+    const recipes = await this.recipeService.getRecipesByAuthorId(account._id)
+    return recipes
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -122,4 +100,28 @@ export class RecipeController {
     const { account } = req.user
     return await this.recipeService.editRecipePermissions(account, recipePermissionsDto)
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  async getRecipeById(@Request() req, @Param() params) {
+    // check if already imported or is owned by
+    const { account } = req.user
+    const recipe = await this.recipeService.getRecipeById(params.id)
+    console.log('recipe', recipe)
+    if (!recipe || recipe.length < 1) {
+      return new NotFoundException()
+    }
+
+    const isAuthor = recipe[0].authorId === `${account._id}`
+
+    if (!isAuthor) {
+      return new ForbiddenException('You don\t have access to this recipe.')
+    }
+
+    return {
+      recipe,
+      alreadyInLibrary: true,
+    }
+  }
+
 }
