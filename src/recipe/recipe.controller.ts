@@ -1,6 +1,7 @@
 
-import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common'
+import { Controller, Request, Post, UseGuards, Body, Param, Get, Patch, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
+import { OptionalJwtAuthGuard } from '../auth/optional'
 import { RecipeService } from './recipe.service'
 import { RecipePayloadDto } from './Payloads/recipe-payload.dto'
 import { EditRecipePayloadDto } from './Payloads/edit-recipe-payload.dto'
@@ -32,7 +33,7 @@ export class RecipeController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/byAuthor')
-  async getRecipesByAuthor(@Request() req): Promise<Array<Recipe>> {
+  async getRecipesByAuthor(@Request() req) {
     const { account } = req.user
     const recipes = await this.recipeService.getRecipesByAuthorId(account._id)
     return recipes
@@ -52,7 +53,7 @@ export class RecipeController {
     return await this.recipeService.addRecipeToFavorites(account, addAsFavorite)
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('/share/:id')
   async getRecipeByShareId(@Request() req, @Param() params) {
     // check if already imported or is owned by
@@ -61,23 +62,26 @@ export class RecipeController {
     if (!recipe || recipe.length < 1) {
       return new NotFoundException()
     }
+    const isAuthor = account ? recipe[0].authorId === `${account._id}` : false
+    const allowed = recipe[0].linkPermissions.findIndex(item => item === 'any') > -1
+    const stewAllowed = recipe[0].linkPermissions.findIndex(item => item === 'stew') > -1
 
-    const isAuthor = recipe[0].authorId === `${account._id}`
-
-    const allowed =
-      recipe[0].linkPermissions.findIndex(item => item === 'any') > -1
-      || isAuthor
-      // add org
-
-    if (!allowed) {
-      return new ForbiddenException('You don\t have access to this recipe.')
+    if (allowed || stewAllowed && account) {
+      const alreadyInLibrary = isAuthor || account && account.importedRecipes.findIndex(shareId => params.id === shareId) > -1
+      return {
+        authed: account ? true : false,
+        isAuthor,
+        stewAllowed,
+        recipe,
+        alreadyInLibrary,
+      }
     }
 
-    const alreadyInLibrary = isAuthor || account.importedRecipes.findIndex(shareId => params.id === shareId) > -1
-    return {
-      recipe,
-      alreadyInLibrary,
+    if (stewAllowed && !account) {
+      return new ForbiddenException('Please login to Stew.')
     }
+
+    return new ForbiddenException('You don\t have access to this recipe.')
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -100,4 +104,27 @@ export class RecipeController {
     const { account } = req.user
     return await this.recipeService.editRecipePermissions(account, recipePermissionsDto)
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  async getRecipeById(@Request() req, @Param() params) {
+    // check if already imported or is owned by
+    const { account } = req.user
+    const recipe = await this.recipeService.getRecipeById(params.id)
+    if (!recipe || recipe.length < 1) {
+      return new NotFoundException()
+    }
+
+    const isAuthor = recipe[0].authorId === `${account._id}`
+
+    if (!isAuthor) {
+      return new ForbiddenException('You don\t have access to this recipe.')
+    }
+
+    return {
+      recipe,
+      alreadyInLibrary: true,
+    }
+  }
+
 }
