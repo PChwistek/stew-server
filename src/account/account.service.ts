@@ -38,7 +38,7 @@ export class AccountService {
 
   async createAccountFromOAuth(payload: OAuthPayloadDto) {
     const fullAccount = new AccountDto(payload.email, '', '', [''])
-    fullAccount.createGoogleAccount(payload.tokenId)
+    fullAccount.createGoogleAccount()
     const createdAccount = new this.accountModel(fullAccount)
     await createdAccount.save()
 

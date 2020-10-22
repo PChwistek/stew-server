@@ -10,4 +10,5 @@ export const AccountSchema = new mongoose.Schema({
   favoriteRecipes: Array,
   importedRecipes: Array,
   orgs: Array,
+  oAuth: Boolean,
 })

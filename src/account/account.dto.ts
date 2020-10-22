@@ -7,7 +7,7 @@ export class AccountDto {
   favoriteRecipes: Array<string>
   lastUpdated: Date
   org: Array<string>
-  oAuthToken: string
+  oAuth: boolean
 
   constructor(email, passwordHash, username, org) {
     this.email = email
@@ -23,8 +23,8 @@ export class AccountDto {
     this.lastUpdated = new Date()
   }
 
-  createGoogleAccount(oAuthToken) {
-    this.oAuthToken = oAuthToken
+  createGoogleAccount() {
+    this.oAuth = true
   }
 
 }

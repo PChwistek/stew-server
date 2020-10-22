@@ -52,6 +52,7 @@ export class AuthService {
 
   async checkOAuthExt(payload: OAuthPayloadDto) {
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${payload.tokenId}`)
+    console.log('google repsonse', googleResponse)
     const { data: { email } } = googleResponse
     return email === payload.email
   }
